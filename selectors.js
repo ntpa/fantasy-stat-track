@@ -4,6 +4,8 @@ module.exports = {
   submit: 'input[class="gigya-input-submit"][data-screenset-roles="instance"]',
   season: '.nameValue.first.last a', // Most recent season
   rosterPage: '.teamName.teamId-10',
+  desiredWeek: 'a.w-14',
+  teamName: '.selecter-selected .label',
   playerNameAndInfo: ['tbody td.playerNameAndInfo a', 'tbody td.playerNameAndInfo em'],
   statTotal: 'tbody td.stat.statTotal.numeric.last'
 }
