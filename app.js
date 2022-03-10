@@ -1,3 +1,4 @@
+const fsPromises = require('fs').promises
 const CREDS = require('./creds.js')
 const SELECTORS = require('./selectors.js')
 const puppeteer = require('puppeteer')
@@ -62,9 +63,9 @@ function createFantasyTeam (page) {
     )
 }
 
-
-function createSeason(fantasyTeam) {
-
+function createSeason (fantasyTeams, seasonYear) {
+  this.fantasyTeams = fantasyTeams
+  this.seasonYear = seasonYear
 }
 
 // Player Object Model
@@ -82,6 +83,9 @@ function Team (playerList, teamName) {
 
 (async () => {
   'use strict'
+
+  const fileError = await fsPromises.open('error.txt', 'w+')
+  const fileOutput = await fsPromises.open('output.txt', 'w+')
 
   const browser = await puppeteer.launch({ headless: false })
   const page = await browser.newPage()
@@ -102,7 +106,8 @@ function Team (playerList, teamName) {
       await page.type(SELECTORS.password, CREDS.password, { delay: 50 })
       await Promise.all([page.waitForNavigation(), page.click(SELECTORS.submit)])
     } catch (error) {
-      console.log('Failed to login into NFL Fantasy site. Please check login credentials')
+      await fileError.appendFile('Failed to login to NFL Fantasy Site')
+      await fileError.appendFile(error)
     }
   }
 
@@ -119,14 +124,15 @@ function Team (playerList, teamName) {
     const rosterLink = await page.$eval(SELECTORS.desiredWeek, (a) => a.getAttribute('href'))
     await page.goto(`${FANTASY_SITE_URL}${rosterLink}`, { waitUntil: 'load' })
   } catch (error) {
-    console.log('Failed to navigate to team roster page.')
+    await fileError.appendFile('Failed to navigate to team roster page.')
+    await fileError.appendFile(error)
   }
 
   // Teams' player information
 
   const links = []
   const fantasyTeams = []
-
+  let fantasySeason
   try {
     // Numeric identifier represents teams in league
     const teamLinks = await page.$eval('.selecter-options', (span) => {
@@ -143,17 +149,26 @@ function Team (playerList, teamName) {
         }
         return links
       })
+
     for (let i = 0; i < teamLinks.length; i++) {
       await page.goto(teamLinks[i], { waitUntil: 'load' })
       fantasyTeams.push(await createFantasyTeam(page))
     }
-
-    for (const team of fantasyTeams) {
-      console.log(team)
-    }
+    await fileOutput.writeFile(JSON.stringify(fantasyTeams, null, 2))
+  /*
+      const leagueID = '6255172'
+      await page.goto(`${FANTASY_SITE_URL}/league/${leagueID}/history`, { waitUntil: 'load' })
+      await page.$eval('div .st-menu', (div) => { return div.firstChild.textContent.slice(0,4)})
+                              .then((seasonYear) => { fantasySeason = createSeason(fantasyTeams, seasonYear)
+                              })
+  */
   } catch (error) {
-    console.log("Failed to get other teams' information")
+    fileError.appendFile("Failed to get other teams' information")
+    fileError.appendFile(error)
   }
-
+  
+  
+  await fileOutput.close()
+  await fileError.close()
   await browser.close()
 })()
