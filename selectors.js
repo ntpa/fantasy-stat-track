@@ -7,5 +7,5 @@ module.exports = {
   desiredWeek: 'a.w-14',
   teamName: '.selecter-selected .label',
   playerNameAndInfo: ['tbody td.playerNameAndInfo a', 'tbody td.playerNameAndInfo em'],
-  statTotal: 'tbody td.stat.statTotal.numeric.last'
+  playerTotalPoints: 'tbody td.stat.statTotal.numeric.last'
 }
