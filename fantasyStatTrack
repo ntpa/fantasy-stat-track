@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Empty logginng files prior to execution 
+echo ' ' > output.txt
+echo ' ' > error.txt
+
+node app.js > debug.txt

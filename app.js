@@ -1,7 +1,25 @@
-const fsPromises = require('fs').promises
+const puppeteer = require('puppeteer')
+const mongoose = require('mongoose')
+const fs = require('fs')
+
 const CREDS = require('./creds.js')
 const SELECTORS = require('./selectors.js')
-const puppeteer = require('puppeteer')
+const db = require('./models/player.js')
+
+// Player Object
+function Player (name, position, pointsTotal, leagueTeam) {
+  this.name = name
+  this.position = position
+  this.pointsTotal = pointsTotal
+  this.leagueTeam = leagueTeam
+}
+
+// ----------- Retrieve Functions --------- //
+/* ** The functions below main use is to retrieve **
+    players' information from a team's web page.
+    Player information is in the model, they include:
+      - Name      - Total points for the season
+      - Position  - The team they belong to in the league */
 
 function retrieveNames (page, sel) {
   return page.$$eval(sel, (table) => {
@@ -37,85 +55,56 @@ function retrieveTeamName (page, sel) {
   return page.$eval(sel, (span) => span.textContent)
 }
 
-function createRoster (playerList, teamName) {
-  return new Team(playerList, teamName)
-}
+// -------- File System wrappers --------- //
+/* ** Different OS follow different rules **
+    * please check out fs docs nodeJS *   */
 
-function createPlayerList (playerNames, playerPositions, playerTotalPoints) {
-  const playerList = []
-  for (let i = 0; i < playerNames.length; i++) {
-    const player = new Player(playerNames[i], playerPositions[i], playerTotalPoints[i])
-    playerList.push(player)
-  }
+// TODO: Add support for file permissions. (Nullish coalescing operator required for implementation)
 
-  return playerList
-}
+function closeFileSync (file) {
+  fs.open(file, (err, fd) => {
+    if (err) throw err
 
-function createFantasyTeam (page) {
-  return Promise.all([retrieveNames(page, SELECTORS.playerNameAndInfo[0]),
-    retrievePositions(page, SELECTORS.playerNameAndInfo[1]),
-    retrieveTotalPoints(page, SELECTORS.playerTotalPoints),
-    retrieveTeamName(page, SELECTORS.teamName)
-  ])
-    .then((values) => {
-      return createRoster((createPlayerList(values[0], values[1], values[2])), values[3])
-    }, error => { console.log(error) }
-    )
-}
-
-function createSeason (fantasyTeams, seasonYear) {
-  this.fantasyTeams = fantasyTeams
-  this.seasonYear = seasonYear
-}
-
-// Player Object Model
-function Player (name, position, pointsTotal) {
-  this.name = name
-  this.position = position
-  this.pointsTotal = pointsTotal
-}
-
-// Team Object Model
-function Team (playerList, teamName) {
-  this.playerList = playerList
-  this.teamName = teamName
+    fs.closeSync(fd, (err) => {
+      if (err) throw err
+    })
+  })
 }
 
 (async () => {
   'use strict'
 
-  const fileError = await fsPromises.open('error.txt', 'w+')
-  const fileOutput = await fsPromises.open('output.txt', 'w+')
+  // TODO: Add error handling for file open and write
+  // Choose to leave out paths for simplicity
+  const fileError = './error.txt'
+  const fileOutput = './output.txt'
 
   const browser = await puppeteer.launch({ headless: false })
   const page = await browser.newPage()
 
+  // ** CONSTANTS *** //
+  // ---------------- ///
+
   const FANTASY_SITE_URL = 'https://fantasy.nfl.com'
   const LOGIN_URL = 'https://fantasy.nfl.com/account/sign-in?s=fantasy&returnTo=http%3A%2F%2Ffantasy.nfl.com%2Fmyleagues'
+  const user = encodeURIComponent(CREDS.dbUser)
+  const password = encodeURIComponent(CREDS.dbPassword)
+  const dbName = encodeURIComponent(CREDS.dbName)
 
-  try {
+  // *** HELPER FUNCTOIONS ** //
+  // These had to be declared in main async loop
+  //  due to error retrieving page methods //
+
+  // Technically, do not need to pass in SELECTORS and CREDS because
+  //  they are global consts.
+  async function loginToFantasySite (page, SELECTORS, CREDS) {
     await page.goto(LOGIN_URL, { waitUntil: 'load' })
-    await page.type(SELECTORS.username, CREDS.username, { delay: 50 })
-    await page.type(SELECTORS.password, CREDS.password, { delay: 50 })
-    await Promise.all([page.waitForNavigation(), page.click(SELECTORS.submit)])
-  } catch (error) {
-    // retry login attempt
-    try {
-      await page.goto(LOGIN_URL, { waitUntil: 'load' })
-      await page.type(SELECTORS.username, CREDS.username, { delay: 50 })
-      await page.type(SELECTORS.password, CREDS.password, { delay: 50 })
-      await Promise.all([page.waitForNavigation(), page.click(SELECTORS.submit)])
-    } catch (error) {
-      await fileError.appendFile('Failed to login to NFL Fantasy Site')
-      await fileError.appendFile(error)
-    }
+    await page.type(SELECTORS.username, CREDS.nflUsername, { delay: 50 })
+    await page.type(SELECTORS.password, CREDS.nflPassword, { delay: 50 })
+    return Promise.all([page.waitForNavigation(), page.click(SELECTORS.submit)])
   }
 
-  // ---- Anything below this requires authentication from previous code block above ----- //
-  // --- However, can access other team's stats without using team authentication --- //
-
-  try {
-    await page.waitForSelector(SELECTORS.season)
+  async function goToTeamRoster (page, SELECTORS) {
     const leagueLink = await page.$eval(SELECTORS.rosterPage, (a) => a.getAttribute('href'))
     await page.goto(`${FANTASY_SITE_URL}${leagueLink}`, { waitUntil: 'load' })
 
@@ -123,52 +112,108 @@ function Team (playerList, teamName) {
     // Developer has decided that the last regular season game roster satisfies the above criteria best
     const rosterLink = await page.$eval(SELECTORS.desiredWeek, (a) => a.getAttribute('href'))
     await page.goto(`${FANTASY_SITE_URL}${rosterLink}`, { waitUntil: 'load' })
+  }
+  /* --------------------------------------------
+              ------------------------------------- */
+
+  await mongoose.connect(`mongodb+srv://${user}:${password}@cluster0.z1ehg.mongodb.net/${dbName}?retryWrites=true&w=majority`)
+
+  try {
+    fs.openSync(fileOutput)
+    fs.openSync(fileError)
+
+    await loginToFantasySite(page, SELECTORS, CREDS)
   } catch (error) {
-    await fileError.appendFile('Failed to navigate to team roster page.')
-    await fileError.appendFile(error)
+    // retry login attempt
+    try {
+      await loginToFantasySite(page, SELECTORS, CREDS)
+    } catch (error) {
+      fs.appendFileSync(fileError, 'Failed to login to NFL Fantasy Site\n')
+      fs.appendFileSync(fileError, `${error}\n`)
+      closeFileSync(fileOutput)
+      closeFileSync(fileError)
+      process.exit(1) // TODO: Make termination graceful
+    }
   }
 
-  // Teams' player information
+  // ---- Anything below this requires authentication from previous code block above ----- //
+
+  try {
+    await goToTeamRoster(page, SELECTORS)
+  } catch (error) {
+    try {
+      await goToTeamRoster(page, SELECTORS)
+    } catch (error) {
+      fs.appendFileSync(fileError, 'Failed to navigate to team roster page.\n')
+      fs.appendFileSync(fileError, `${error}\n`)
+    }
+  }
+
+  // Retrieve player information
 
   const links = []
-  const fantasyTeams = []
-  let fantasySeason
+  const players = []
+
   try {
-    // Numeric identifier represents teams in league
-    const teamLinks = await page.$eval('.selecter-options', (span) => {
+    // get all links to teams' page
+    await page.$eval('.selecter-options', (span) => {
       return span.children.length
+    }).then((numberOfTeams) => {
+      const rosterLink = page.url()
+      // go to each team page
+      for (let i = 1; i < numberOfTeams + 1; i++) { // start at i=1 due to NFL URL Formation
+        let newLink = rosterLink // save original link for subsequent String.replace call
+        // Numeric identifier represents teams in league
+        newLink = rosterLink.replace('team/10', `team/${i}`)
+        // repeat process from previous try block
+        links.push(newLink)
+      }
     })
-      .then((numberOfTeams) => {
-        const rosterLink = page.url()
-        // go to each team page
-        for (let i = 1; i < numberOfTeams + 1; i++) { // start at i=1 due to NFL URL Formation
-          let newLink = rosterLink // save original link for subsequent String.replace call
-          newLink = rosterLink.replace('team/10', `team/${i}`)
-          // repeat process from previous try block
-          links.push(newLink)
+
+    for (let i = 0; i < links.length; i++) {
+    // Go through all rosters
+
+      await page.goto(links[i], { waitUntil: 'load' })
+      await Promise.all([retrieveNames(page, SELECTORS.playerNameAndInfo[0]),
+        retrievePositions(page, SELECTORS.playerNameAndInfo[1]),
+        retrieveTotalPoints(page, SELECTORS.playerTotalPoints),
+        retrieveTeamName(page, SELECTORS.teamName)
+      ]).then((results) => {
+        const length = results[0].length // results[0] results[1] and results[2] all have same lengths
+        for (let i = 0; i < length; i++) {
+          players.push(new Player(results[0][i], results[1][i], results[2][i], results[3]))
         }
-        return links
       })
 
-    for (let i = 0; i < teamLinks.length; i++) {
-      await page.goto(teamLinks[i], { waitUntil: 'load' })
-      fantasyTeams.push(await createFantasyTeam(page))
+      // TODO: Iterate through players from one team,
+      try {
+        for (let j = 0; j < players.length; j++) {
+          const player = players[j]
+          const found = await db.exists({ name: `${player.name}` })
+          if (!found) {
+            await db.create({
+              name: `${player.name}`,
+              position: `${player.position}`,
+              pointsTotal: Number(`${player.pointsTotal}`),
+              leagueTeam: `${player.leagueTeam}`
+            })
+          }
+        }
+      } catch (error) {
+        fs.appendFilySync(fileError, `${error}\n`)
+      }
+
+      fs.appendFileSync(fileOutput, JSON.stringify(players, null, 2))
+      players.length = 0 // clear array
     }
-    await fileOutput.writeFile(JSON.stringify(fantasyTeams, null, 2))
-  /*
-      const leagueID = '6255172'
-      await page.goto(`${FANTASY_SITE_URL}/league/${leagueID}/history`, { waitUntil: 'load' })
-      await page.$eval('div .st-menu', (div) => { return div.firstChild.textContent.slice(0,4)})
-                              .then((seasonYear) => { fantasySeason = createSeason(fantasyTeams, seasonYear)
-                              })
-  */
   } catch (error) {
-    fileError.appendFile("Failed to get other teams' information")
-    fileError.appendFile(error)
+    fs.appendFileSync(fileError, "Failed to get teams' information\n")
+    fs.appendFileSync(fileError, `${error}\n`)
+  } finally {
+    // Close all streams, connections, and files
+    closeFileSync(fileError)
+    closeFileSync(fileOutput)
+    mongoose.connection.close()
+    browser.close()
   }
-  
-  
-  await fileOutput.close()
-  await fileError.close()
-  await browser.close()
 })()
