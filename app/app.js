@@ -9,16 +9,10 @@ const db = require('../lib/models/player.js')
 const retrieve = require('./retrieve.js')
 const navigate = require('./navigate.js')
 
-// -------- File System wrappers --------- //
-/* ** Different OS follow different rules **
-    * please check out fs docs nodeJS *   */
-
-// TODO: Add support for file permissions. (Nullish coalescing operator required for implementation)
-
 function closeFileSync (file) {
   fs.open(file, (err, fd) => {
     if (err) throw err
-
+    // use path of file 
     fs.closeSync(fd, (err) => {
       if (err) throw err
     })
@@ -46,12 +40,11 @@ function closeFileSync (file) {
   try {
     await navigate.fantasyLoginPage(page, SELECTORS, CREDS, navigate.LOGIN_URL)
   } catch (error) {
-    // retry login attempt
     fs.appendFileSync('error.txt', 'Failed to login to NFL Fantasy Site.\n')
     fs.appendFileSync('error.txt', String(`${error}\n`))
     closeFileSync(fileOutput)
     closeFileSync(fileError)
-    process.exit(1) // TODO: Make termination graceful
+    process.exit(1) 
   }
 
   // Go to your Team's Roster Page, where the players on one's team are shown
@@ -61,27 +54,27 @@ function closeFileSync (file) {
   } catch (error) {
     fs.appendFileSync(fileError, 'Failed to navigate to team roster page.\n')
     fs.appendFileSync(fileError, String(`${error}\n`))
+    closeFileSync(fileOutput)
+    closeFileSync(fileError)
+    process.exit(1)
   }
 
   // Retrieve player stats from every team in a league
 
   try {
-    let teamLinks = [] // declared array to allow for length identifier
-    teamLinks = await retrieve.getLinks(page, 'div .selecter-options')
+    const teamLinks = await retrieve.getLinks(page, 'div .selecter-options')
 
     // Go through all rosters and get all player's information
     for (let i = 0; i < teamLinks.length; i++) {
-      // TODO: Bug where certain players position and total points undefined
       const teamPlayers = await retrieve.getPlayers(page, SELECTORS, teamLinks, i) // One team's set of players
-      for (let j = 0; j < teamPlayers.length; j++) {
+      for (let j = 0; j < teamPlayers.length; j++) { // go through all players on a team
         const player = teamPlayers[j]
         const found = await db.exists({ name: `${player.name}` })
 
         if (Number.isNaN(player.pointsTotal)) {
-          throw 'Player points total is not a number!'
+          throw 'Player points total is not a number!\n'
         }        
 
-        // Debug for NaN
         if (!found) { // If not in database, add entry
           await db.create({
             name: `${player.name}`,

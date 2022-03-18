@@ -14,25 +14,33 @@ function Player (name, position, pointsTotal, leagueTeam) {
       - Name      - Total points for the season
       - Position  - The team they belong to in the league */
 
-// get all teamLinks to teams' page
-// teamLinks represent a teams roster page, where player information can be retrieved
-async function getLinks (page, sel) {
-  const teamLinks = []
-  await page.waitForSelector(sel)
-  await page.$eval(sel, (span) => {
+// Return array of links to all teams' roster page
+// Function arguements: 
+//  - page: current page
+//  - selector: CSS selector for individual team roster link 
+async function getLinks (page, selector) {
+  const teamLinks = [] // teamLinks represent a teams roster page, where player information can be retrieved
+  await page.waitForSelector(selector)
+  await page.$eval(selector, (span) => {
     return span.children.length
   }).then((numberOfLinks) => {
     const templateLink = page.url() //
     for (let i = 1; i < numberOfLinks + 1; i++) { // Start at i=1 due to NFL URL Formation
       let link = templateLink
       // Numeric identifier represents team in leagyue
-      link = templateLink.replace('team/10', `team/${i}`) // TODO: Update with regexp logic. Will crash when templateLink difers
+      link = templateLink.replace('team/10', `team/${i}`) // Will crash when templateLink differs (i.e not team 10) 
       teamLinks.push(link)
     }
   })
  return teamLinks
 }
 
+// Return array of Player objects
+// Function arguements:
+//  - page: current page
+//  - selectors: CSS selectors for player's name, position, total points and team name
+//  - teamLinks: array of links to all teams' roster page
+//  - index: position in teamLinks array 
 async function getPlayers (page, selectors, teamLinks, index) {
   const players = []
 
@@ -50,23 +58,34 @@ async function getPlayers (page, selectors, teamLinks, index) {
   return players
 }
 
-function getNames (page, sel) {
-  return page.$$eval(sel, (table) => {
+// Return array of player names
+// Function arguements:
+//  - page: current page
+//  - selector: CSS selector for the player's name field
+function getNames (page, selector) {
+  return page.$$eval(selector, (table) => {
     const array = []
     for (let i = 0; i < table.length; i++) {
+      
       // Skip "View News" Table Entry for player
-      if (table[i].textContent == "View News"
-      array.push(table[i].textContent)
+      if (table[i].textContent == "View News") {
+        array.push(table[i].textContent)
+      }
     }
     return array
   })
 }
-function getPositions (page, sel) {
-  return page.$$eval(sel, (table) => {
+
+// Return array of player positions
+// Function arguements: 
+//  - page: current page
+//  - selector: CSS selector for the player's position field 
+function getPositions (page, selector) {
+  return page.$$eval(selector, (table) => {
  
     const array = []
     for (let i = 0; i < table.length; i++) {
-      // Positions represented by 2 or 3 letter string
+      // Positions represented by 3 or greater  length string
       const positionName = table[i].textContent
       if (positionName.length == 3) { // DEF no need to slice off  
         array.push(positionName)
@@ -79,8 +98,12 @@ function getPositions (page, sel) {
   })
 }
 
-function getTotalPoints (page, sel) {
-  return page.$$eval(sel, (table) => {
+// Return array of player total points
+// Function arguements: 
+//  - page: current page
+//  - selectors: CSS Selector for the player's total points field
+function getTotalPoints (page, selector) {
+  return page.$$eval(selector, (table) => {
     const array = []
     for (let i = 0; i < table.length; i++) {
       console.log(table[i].textContent)
@@ -90,8 +113,12 @@ function getTotalPoints (page, sel) {
   })
 }
 
-function getTeamName (page, sel) {
-  return page.$eval(sel, (span) => span.textContent)
+// Return team name
+// Function arguements: 
+//  - page: current page
+//  - selector: CSS selector for player team name. Team name represents fantasy team name NOT NF: team name 
+function getTeamName (page, selector) {
+  return page.$eval(selector, (span) => span.textContent)
 }
 
 module.exports = { getNames, getPositions, getTotalPoints, getTeamName, getLinks, getPlayers }
