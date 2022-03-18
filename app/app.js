@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer')
 const mongoose = require('mongoose')
 const fs = require('fs')
+const path = require('path')
 
 // User generated files
 const CREDS = require('./creds.js')
@@ -25,8 +26,8 @@ function closeFileSync (file) {
   // ** CONSTANTS *** //
   // ---------------- ///
 
-  const fileError = 'error.txt'
-  const fileOutput = 'output.txt'
+  const fileError = path.resolve('log', 'error.txt')
+  const fileOutput = path.resolve('log', 'output.txt')
   const user = encodeURIComponent(CREDS.dbUser)
   const password = encodeURIComponent(CREDS.dbPassword)
   const dbName = encodeURIComponent(CREDS.dbName)
@@ -40,8 +41,8 @@ function closeFileSync (file) {
   try {
     await navigate.fantasyLoginPage(page, SELECTORS, CREDS, navigate.LOGIN_URL)
   } catch (error) {
-    fs.appendFileSync('error.txt', 'Failed to login to NFL Fantasy Site.\n')
-    fs.appendFileSync('error.txt', String(`${error}\n`))
+    fs.appendFileSync(fileError, 'Failed to login to NFL Fantasy Site.\n')
+    fs.appendFileSync(fileError, String(`${error}\n`))
     closeFileSync(fileOutput)
     closeFileSync(fileError)
     process.exit(1) 
@@ -85,12 +86,12 @@ function closeFileSync (file) {
         }
       }
 
-      fs.appendFileSync('output.txt', JSON.stringify(teamPlayers, null, 2)) // JSON text file created for those who do not have DB
+      fs.appendFileSync(fileOutput, JSON.stringify(teamPlayers, null, 2)) // JSON text file created for those who do not have DB
       teamPlayers.length = 0 // clear array
     }
   } catch (error) {
-    fs.appendFileSync('error.txt', "Failed to get teams' information\n")
-    fs.appendFileSync('error.txt', String(`${error}\n`))
+    fs.appendFileSync(fileError, "Failed to get teams' information\n")
+    fs.appendFileSync(fileError, String(`${error}\n`))
   } finally {
     // Close all streams, connections, and files
     closeFileSync(fileError)

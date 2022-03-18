@@ -66,11 +66,7 @@ function getNames (page, selector) {
   return page.$$eval(selector, (table) => {
     const array = []
     for (let i = 0; i < table.length; i++) {
-      
-      // Skip "View News" Table Entry for player
-      if (table[i].textContent == "View News") {
         array.push(table[i].textContent)
-      }
     }
     return array
   })
