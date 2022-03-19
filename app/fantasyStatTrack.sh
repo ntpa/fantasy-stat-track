@@ -3,14 +3,25 @@
 
 
 # Implementation only for my system. As of now
-# TODO: Implement logic when the below directory and file not created
-outputFile="$PWD/log/output.txt"
-errorFile="$PWD/log/error.txt"
-debugFile="$PWD/log/debug.txt"
+
+DIR_LOG="$PWD/log"
+if [ ! -d "$PWD/log" ]; then # Create log directory and files if not already present
+  mkdir $DIR_LOG
+  touch "$DIR_LOG/output.txt"
+  touch "$DIR_LOG/error.txt"
+  touch "$DIR_LOG/debug.txt"
+else 
+  touch "$DIR_LOG/output.txt"
+  touch "$DIR_LOG/error.txt"
+  touch "$DIR_LOG/debug.txt"
+fi
+
+outputFile="$DIR_LOG/output.txt"
+errorFile="$DIR_LOG/error.txt"
+debugFile="$DIR_LOG/debug.txt"
 
 # Empty logginng files prior to execution 
-echo ' ' > "$outputFile"
-echo ' ' > "$errorFile"
+echo ' ' > "$outputFile" > "$errorFile"
 
 
 node app.js > "$debugFile"
