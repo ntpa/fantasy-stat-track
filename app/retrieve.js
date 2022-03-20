@@ -9,11 +9,14 @@ function Player (name, position, pointsTotal, leagueTeam) {
 
 // ----------- Retrieve Functions --------- //
 /* ** The functions below main use is to retrieve **
-    players' information from a team's web page.
-    Player information is in the model, they include:
-      - Name      - Total points for the season
-      - Position  - The team they belong to in the league */
+    information from a team's web page.
+*/ 
 
+async function getTeamID(teamLink) {
+  const regExpOne = /team/;
+  const regExpTwo = '?'
+  return await teamLink.slice(teamLink.indexOf(regExpOne), teamLink.indexOf(regExpTwo))
+}
 // Return array of links to all teams' roster page
 // Function arguements: 
 //  - page: current page
@@ -24,12 +27,16 @@ async function getLinks (page, selector) {
   await page.$eval(selector, (span) => {
     return span.children.length
   }).then((numberOfLinks) => {
-    const templateLink = page.url() //
+    const templateLink = page.url() 
     for (let i = 1; i < numberOfLinks + 1; i++) { // Start at i=1 due to NFL URL Formation
-      let link = templateLink
-      // Numeric identifier represents team in leagyue
-      link = templateLink.replace('team/10', `team/${i}`) // Will crash when templateLink differs (i.e not team 10) 
-      teamLinks.push(link)
+
+      getTeamID(templateLink).then((teamID) => {
+        const regExpID = /team\/(\d\d)\?/;
+        // Numeric identifier represents team in league
+        // Number of teams typically range from 8 - 14 teams, so reprenseted by single or double digit identifier in URL
+        teamLinks.push(templateLink.replace(regExpID, `team/${i}?`))
+      })
+      // Double digits if more than 9 teams in league, otherwise one digit
     }
   })
  return teamLinks

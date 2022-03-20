@@ -64,7 +64,7 @@ function closeFileSync (file) {
 
   try {
     const teamLinks = await retrieve.getLinks(page, 'div .selecter-options')
-
+    await console.log(teamLinks)
     // Go through all rosters and get all player's information
     for (let i = 0; i < teamLinks.length; i++) {
       const teamPlayers = await retrieve.getPlayers(page, SELECTORS, teamLinks, i) // One team's set of players
