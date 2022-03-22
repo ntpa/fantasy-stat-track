@@ -13,7 +13,7 @@ const navigate = require('./navigate.js')
 function closeFileSync (file) {
   fs.open(file, (err, fd) => {
     if (err) throw err
-    // use path of file 
+    // use path of file
     fs.closeSync(fd, (err) => {
       if (err) throw err
     })
@@ -31,7 +31,16 @@ function closeFileSync (file) {
   const user = encodeURIComponent(CREDS.dbUser)
   const password = encodeURIComponent(CREDS.dbPassword)
   const dbName = encodeURIComponent(CREDS.dbName)
-  await mongoose.connect(`mongodb+srv://${user}:${password}@cluster0.z1ehg.mongodb.net/${dbName}?retryWrites=true&w=majority`)
+
+  let dbActive = true // Assume connection will be made
+
+  // Allow the program to continue execution when mongoose fails to connect
+  try {
+    await mongoose.connect(`mongodb+srv://${user}:${password}@cluster0.z1ehg.mongodb.net/${dbName}?retryWrites=true&w=majority`)
+  } catch (error) {
+    fs.appendFileSync(fileError, `${error}\n`)
+    dbActive = false
+  }
 
   // Attempt to Login to fantasy site
 
@@ -45,7 +54,7 @@ function closeFileSync (file) {
     fs.appendFileSync(fileError, String(`${error}\n`))
     closeFileSync(fileOutput)
     closeFileSync(fileError)
-    process.exit(1) 
+    process.exit(1)
   }
 
   // Go to your Team's Roster Page, where the players on one's team are shown
@@ -64,29 +73,30 @@ function closeFileSync (file) {
 
   try {
     const teamLinks = await retrieve.getLinks(page, 'div .selecter-options')
-    await console.log(teamLinks)
     // Go through all rosters and get all player's information
     for (let i = 0; i < teamLinks.length; i++) {
       const teamPlayers = await retrieve.getPlayers(page, SELECTORS, teamLinks, i) // One team's set of players
       for (let j = 0; j < teamPlayers.length; j++) { // go through all players on a team
         const player = teamPlayers[j]
-        const found = await db.exists({ name: `${player.name}` })
-
         if (Number.isNaN(player.pointsTotal)) {
-          throw 'Player points total is not a number!\n'
-        }        
-
-        if (!found) { // If not in database, add entry
-          await db.create({
-            name: `${player.name}`,
-            position: `${player.position}`,
-            pointsTotal: Number(`${player.pointsTotal}`),
-            leagueTeam: `${player.leagueTeam}`
-          })
+          throw new Error('Player points total is not a number!\n')
         }
+
+        if (dbActive) { // Proper database connection established
+          const isInDatabase = await db.exists({ name: `${player.name}` })
+          if (!isInDatabase) {
+            await db.create({
+              name: `${player.name}`,
+              position: `${player.position}`,
+              pointsTotal: Number(`${player.pointsTotal}`),
+              leagueTeam: `${player.leagueTeam}`
+            })
+          }
+        } // End of database entry operations
       }
 
-      fs.appendFileSync(fileOutput, JSON.stringify(teamPlayers, null, 2)) // JSON text file created for those who do not have DB
+      // JSON text file created for those who do not have DB
+      fs.appendFileSync(fileOutput, JSON.stringify(teamPlayers, null, 2))
       teamPlayers.length = 0 // clear array
     }
   } catch (error) {
