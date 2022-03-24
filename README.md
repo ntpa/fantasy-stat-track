@@ -7,12 +7,12 @@ Track statistics from your NFL Fanstasy League
  
 ---
 
-##### Requirements:
+### Requirements:
  
   - NFL Fantasy Account with at least one season 
   - MongoDB Atlas account 
 
-##### Future goals include:
+### Future goals include:
 
   - Retrieve statistics other than fantasy points. Includes yards, touchdowns, as well as position specific statistics such as receptions, passing and rushing yards
   - Visualize the data, create insights, get information from multiple seasons
