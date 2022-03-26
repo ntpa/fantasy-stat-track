@@ -76,23 +76,20 @@ function closeFileSync (file) {
     // Go through all rosters and get all player's information
     for (let i = 0; i < teamLinks.length; i++) {
       const teamPlayers = await retrieve.getPlayers(page, SELECTORS, teamLinks, i) // One team's set of players
+      
       for (let j = 0; j < teamPlayers.length; j++) { // go through all players on a team
         const player = teamPlayers[j]
         if (Number.isNaN(player.pointsTotal)) {
           throw new Error('Player points total is not a number!\n')
         }
 
-        if (dbActive) { // Proper database connection established
-          const isInDatabase = await db.exists({ name: `${player.name}` })
-          if (!isInDatabase) {
-            await db.create({
-              name: `${player.name}`,
-              position: `${player.position}`,
-              pointsTotal: Number(`${player.pointsTotal}`),
-              leagueTeam: `${player.leagueTeam}`
-            })
-          }
+        /* Is there currrent connection to DB? 
+           '&&' Short circuits and will not check for player in database
+           if db is not active */
+        if (dbActive && (!(await db.playerFound(player.name)))) { 
+            await db.addPlayer(player) 
         } // End of database entry operations
+      
       }
 
       // JSON text file created for those who do not have DB

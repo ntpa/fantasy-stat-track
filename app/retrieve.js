@@ -10,36 +10,36 @@ function Player (name, position, pointsTotal, leagueTeam) {
 // ----------- Retrieve Functions --------- //
 /* ** The functions below main use is to retrieve **
     information from a team's web page.
-*/ 
+*/
 
-async function getTeamID(teamLink) {
-  const regExpOne = /team/;
+async function getTeamID (teamLink) {
+  const regExpOne = /team/
   const regExpTwo = '?'
   return await teamLink.slice(teamLink.indexOf(regExpOne), teamLink.indexOf(regExpTwo))
 }
+
 // Return array of links to all teams' roster page
-// Function arguements: 
+// Function arguements:
 //  - page: current page
-//  - selector: CSS selector for individual team roster link 
+//  - selector: CSS selector for individual team roster link
+
 async function getLinks (page, selector) {
   const teamLinks = [] // teamLinks represent a teams roster page, where player information can be retrieved
   await page.waitForSelector(selector)
   await page.$eval(selector, (span) => {
     return span.children.length
   }).then((numberOfLinks) => {
-    const templateLink = page.url() 
+    const templateLink = page.url()
     for (let i = 1; i < numberOfLinks + 1; i++) { // Start at i=1 due to NFL URL Formation
-
       getTeamID(templateLink).then((teamID) => {
-        const regExpID = /team\/(\d\d)\?/;
         // Numeric identifier represents team in league
         // Number of teams typically range from 8 - 14 teams, so reprenseted by single or double digit identifier in URL
-        teamLinks.push(templateLink.replace(regExpID, `team/${i}?`))
+        teamLinks.push(templateLink.replace(teamID, `/team/${i}?`))
+        // Double digits if more than 9 teams in league, otherwise one digit
       })
-      // Double digits if more than 9 teams in league, otherwise one digit
     }
   })
- return teamLinks
+  return teamLinks
 }
 
 // Return array of Player objects
@@ -47,7 +47,7 @@ async function getLinks (page, selector) {
 //  - page: current page
 //  - selectors: CSS selectors for player's name, position, total points and team name
 //  - teamLinks: array of links to all teams' roster page
-//  - index: position in teamLinks array 
+//  - index: position in teamLinks array
 async function getPlayers (page, selectors, teamLinks, index) {
   const players = []
 
@@ -73,27 +73,25 @@ function getNames (page, selector) {
   return page.$$eval(selector, (table) => {
     const array = []
     for (let i = 0; i < table.length; i++) {
-        array.push(table[i].textContent)
+      array.push(table[i].textContent)
     }
     return array
   })
 }
 
 // Return array of player positions
-// Function arguements: 
+// Function arguements:
 //  - page: current page
-//  - selector: CSS selector for the player's position field 
+//  - selector: CSS selector for the player's position field
 function getPositions (page, selector) {
   return page.$$eval(selector, (table) => {
- 
     const array = []
     for (let i = 0; i < table.length; i++) {
       // Positions represented by 3 or greater  length string
       const positionName = table[i].textContent
-      if (positionName.length == 3) { // DEF no need to slice off  
+      if (positionName.length === 3) { // DEF no need to slice off
         array.push(positionName)
-      }
-      else {
+      } else {
         array.push(positionName.slice(0, 2))
       }
     }
@@ -102,7 +100,7 @@ function getPositions (page, selector) {
 }
 
 // Return array of player total points
-// Function arguements: 
+// Function arguements:
 //  - page: current page
 //  - selectors: CSS Selector for the player's total points field
 function getTotalPoints (page, selector) {
@@ -117,9 +115,9 @@ function getTotalPoints (page, selector) {
 }
 
 // Return team name
-// Function arguements: 
+// Function arguements:
 //  - page: current page
-//  - selector: CSS selector for player team name. Team name represents fantasy team name NOT NF: team name 
+//  - selector: CSS selector for player team name. Team name represents fantasy team name NOT NF: team name
 function getTeamName (page, selector) {
   return page.$eval(selector, (span) => span.textContent)
 }
