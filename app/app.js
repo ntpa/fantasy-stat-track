@@ -6,7 +6,7 @@ const path = require('path')
 // User generated files
 const CREDS = require('./creds.js')
 const SELECTORS = require('./selectors.js')
-const db = require('../lib/models/player.js')
+const dbPlayer = require('../lib/models/player.js')
 const retrieve = require('./retrieve.js')
 const navigate = require('./navigate.js')
 
@@ -32,35 +32,25 @@ function closeFileSync (file) {
   const password = encodeURIComponent(CREDS.dbPassword)
   const dbName = encodeURIComponent(CREDS.dbName)
 
-  let dbActive = true // Assume connection will be made
+  let dbPlayerActive = true // Assume connection will be made
 
   // Allow the program to continue execution when mongoose fails to connect
   try {
     await mongoose.connect(`mongodb+srv://${user}:${password}@cluster0.z1ehg.mongodb.net/${dbName}?retryWrites=true&w=majority`)
   } catch (error) {
     fs.appendFileSync(fileError, `${error}\n`)
-    dbActive = false
+    dbPlayerActive = false
   }
-
-  // Attempt to Login to fantasy site
 
   const browser = await puppeteer.launch({ headless: false })
   const page = await browser.newPage()
 
   try {
-    await navigate.fantasyLoginPage(page, SELECTORS, CREDS, navigate.LOGIN_URL)
-  } catch (error) {
-    fs.appendFileSync(fileError, 'Failed to login to NFL Fantasy Site.\n')
-    fs.appendFileSync(fileError, String(`${error}\n`))
-    closeFileSync(fileOutput)
-    closeFileSync(fileError)
-    process.exit(1)
-  }
-
-  // Go to your Team's Roster Page, where the players on one's team are shown
-
-  try {
+    // Attempt to Login to fantasy site
+    await navigate.fantasyLoginPage(page, SELECTORS, CREDS, navigate.LOGIN_URL) 
+    // Go to your Team's Roster Page, where the players on one's team are shown
     await navigate.teamRosterPage(page, SELECTORS, navigate.FANTASY_SITE_URL)
+
   } catch (error) {
     fs.appendFileSync(fileError, 'Failed to navigate to team roster page.\n')
     fs.appendFileSync(fileError, String(`${error}\n`))
@@ -73,6 +63,7 @@ function closeFileSync (file) {
 
   try {
     const teamLinks = await retrieve.getLinks(page, 'div .selecter-options')
+ 
     // Go through all rosters and get all player's information
     for (let i = 0; i < teamLinks.length; i++) {
       const teamPlayers = await retrieve.getPlayers(page, SELECTORS, teamLinks, i) // One team's set of players
@@ -86,13 +77,14 @@ function closeFileSync (file) {
         /* Is there currrent connection to DB? 
            '&&' Short circuits and will not check for player in database
            if db is not active */
-        if (dbActive && (!(await db.playerFound(player.name)))) { 
-            await db.addPlayer(player) 
+        if (dbPlayerActive && (!(await dbPlayer.playerFound(player.name)))) {
+        // We can assume if a player is in dbPlayer then it is in dbTeam 
+            await dbPlayer.addPlayer(player) 
         } // End of database entry operations
       
       }
 
-      // JSON text file created for those who do not have DB
+      // JSON text file created for those who do not have DB or prefer to parse text
       fs.appendFileSync(fileOutput, JSON.stringify(teamPlayers, null, 2))
       teamPlayers.length = 0 // clear array
     }
