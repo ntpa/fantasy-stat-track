@@ -34,17 +34,32 @@ Ensure that the proper node dependencies are installed
     
 ### Running the application 
 
-There are two main options for running the application.
+##### To utilize the [MongoDB Atlas](https://www.mongodb.com/atlas/database) service:
+1. Sign up for an account
+2. Under the fantasy-stat-track/app/ directory create a file named `cred.js`
 
-The prefered method is through the shell script
+```javascript
+  module.exports = {
+    nflUsername: <nfl-fantasy-account-username>,
+    nflPassword: <nfl-fantasy-account-password>,
+    dbName: <MongoDB-Atlas-database-name>,
+    dbPassword: <MongoDB-Atlas-database-password>
+  }
+```
+> If you wish to contribute or make fork public, please make sure to add `creds.js` to your `.gitignore`
+
+
+#### There are two main options for running the application.
+
+The prefered method is through the shell script:
     
     source fantasyStatTrack.sh 
     
-Directly through `node`
+The other option is directly through the `node` command
     
     node app.js
     
-> If you choose to run directly through `node` make sure to truncate the files in the log/ directory before subsequent runs
+> If you choose to run directly through `node` make sure to truncate the output files in the log/ directory before subsequent runs
 
 --- 
 
