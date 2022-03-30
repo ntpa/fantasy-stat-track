@@ -66,7 +66,6 @@ The other option is directly through the `node` command
 ### Future goals include:
 
 - Add testing suite to the project
-- Retrieve statistics other than fantasy points. Includes yards, touchdowns, as well as position specific statistics such as receptions, passing and rushing yards
 - Visualize the data, create insights, get information from multiple seasons
 - Include other fantasy football providers, such as ESPN and Yahoo
 
