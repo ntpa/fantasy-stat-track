@@ -39,6 +39,7 @@ Ensure that the proper node dependencies are installed
 2. Under the fantasy-stat-track/app/ directory create a file named `cred.js`
 
 ```javascript
+
   module.exports = {
     nflUsername: <nfl-fantasy-account-username>,
     nflPassword: <nfl-fantasy-account-password>,
@@ -46,6 +47,7 @@ Ensure that the proper node dependencies are installed
     dbName: <MongoDB-Atlas-database-name>,
     dbPassword: <MongoDB-Atlas-database-password>
   }
+  
 ```
 
 > If you wish to contribute or make fork public, please make sure to add `creds.js` to your `.gitignore`
