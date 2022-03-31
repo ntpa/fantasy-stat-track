@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer')
 const mongoose = require('mongoose')
 const fs = require('fs')
-const path = require('path')
+const path = require('path/posix') // conform to POSIX 
 
 // User generated files
 const CREDS = require('./creds.js')
@@ -11,6 +11,11 @@ const retrieve = require('./retrieve.js')
 const navigate = require('./navigate.js')
 
 function closeFileSync (file) {
+  if (!fs.existsSync(file)) {
+    // file does not exists so no need to close
+    // ex. code below will throw error in attempt to close file that is not created
+    return; 
+  }
   fs.open(file, (err, fd) => {
     if (err) throw err
     // use path of file
@@ -23,14 +28,26 @@ function closeFileSync (file) {
 (async () => {
   'use strict'
 
-  // ** CONSTANTS *** //
+  if (!fs.existsSync('./log')) {
+    // create log directroy. Synchronous call because immediate use may happen
+    fs.mkdirSync('./log/')
+  }
+  //** Filesystem Initialization */
+  const fileError = path.resolve('log', './error.txt')
+  const fileOutput = path.resolve('log', './output.txt')
+  // Ensure files are clear from previous runs
+  if (fs.existsSync(fileError)) fs.truncateSync(fileError);
+  if (fs.existsSync(fileOutput)) fs.truncateSync(fileOutput);
+ 
   // ---------------- ///
 
-  const fileError = path.resolve('log', 'error.txt')
-  const fileOutput = path.resolve('log', 'output.txt')
+  // ** CONSTANTS *** //
+
   const user = encodeURIComponent(CREDS.dbUser)
   const password = encodeURIComponent(CREDS.dbPassword)
   const dbName = encodeURIComponent(CREDS.dbName)
+
+  // ---------------- //
 
   let dbPlayerActive = true // Assume connection will be made
 
