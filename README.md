@@ -36,16 +36,16 @@ Ensure that the proper node dependencies are installed
 
 ##### To utilize the [MongoDB Atlas](https://www.mongodb.com/atlas/database) service:
 1. Sign up for an account
-2. Under the fantasy-stat-track/app/ directory create a file named `cred.js`
+2. Under the fantasy-stat-track/app/ directory create a file named `creds.js`
 
 ```javascript
 
   module.exports = {
-    nflUsername: <nfl-fantasy-account-username>,
-    nflPassword: <nfl-fantasy-account-password>,
-    dbUser: <MongoDB-Atlas-database-user>,
-    dbName: <MongoDB-Atlas-database-name>,
-    dbPassword: <MongoDB-Atlas-database-password>
+    nflUsername: '<nfl-fantasy-account-username>',
+    nflPassword: '<nfl-fantasy-account-password>',
+    dbUser: '<MongoDB-Atlas-database-user>',
+    dbName: '<MongoDB-Atlas-database-name>',
+    dbPassword: '<MongoDB-Atlas-database-password>'
   }
   
 ```
