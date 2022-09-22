@@ -1,12 +1,10 @@
 const puppeteer = require('puppeteer')
-const mongoose = require('mongoose')
 const fs = require('fs')
 const path = require('path/posix') // conform to POSIX
 
 // User generated files
 const CREDS = require('./creds.js')
 const SELECTORS = require('./selectors.js')
-const dbPlayer = require('../lib/models/player.js')
 const retrieve = require('./retrieve.js')
 const navigate = require('./navigate.js')
 
@@ -32,7 +30,8 @@ function closeFileSync (file) {
     // create log directroy. Synchronous call because immediate use may happen
     fs.mkdirSync('./log/')
   }
-  //* * Filesystem Initialization */
+
+  /** Filesystem Initialization **/
   const fileError = path.resolve('log', './error.txt')
   const fileOutput = path.resolve('log', './output.txt')
   // Ensure files are clear from previous runs
@@ -41,23 +40,6 @@ function closeFileSync (file) {
 
   // ---------------- ///
 
-  // ** CONSTANTS *** //
-
-  const user = encodeURIComponent(CREDS.dbUser)
-  const password = encodeURIComponent(CREDS.dbPassword)
-  const dbName = encodeURIComponent(CREDS.dbName)
-
-  // ---------------- //
-
-  let connectionActive = true // Assume connection will be made
-
-  // Allow the program to continue execution when mongoose fails to connect
-  try {
-    await mongoose.connect(`mongodb+srv://${user}:${password}@cluster0.z1ehg.mongodb.net/${dbName}?retryWrites=true&w=majority`)
-  } catch (error) {
-    fs.appendFileSync(fileError, `${error}\n`)
-    connectionActive = false
-  }
 
   const browser = await puppeteer.launch({ headless: false })
   const page = await browser.newPage()
@@ -89,14 +71,6 @@ function closeFileSync (file) {
         if (Number.isNaN(player.pointsTotal)) {
           throw new Error('Player points total is not a number!\n')
         }
-
-        /* Is there currrent connection to DB?
-           '&&' Short circuits and will not check for player in database
-           if db is not active */
-        if (connectionActive && (!(await dbPlayer.playerFound(player.name)))) {
-        // We can assume if a player is in dbPlayer then it is in dbTeam
-          await dbPlayer.addPlayer(player)
-        } // End of database entry operations
       }
 
       // JSON text file created for those who do not have DB or prefer to parse text
@@ -110,7 +84,6 @@ function closeFileSync (file) {
     // Close all streams, connections, and files
     closeFileSync(fileError)
     closeFileSync(fileOutput)
-    mongoose.connection.close()
     browser.close()
   }
 })()
