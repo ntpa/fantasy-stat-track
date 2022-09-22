@@ -1,7 +1,5 @@
 {
   "dependencies": {
-    "mongodb": "^4.9.0",
-    "mongoose": "^6.5.4",
     "puppeteer": "^13.7.0",
     "standard": "^17.0.0"
   }
