@@ -5,16 +5,11 @@ Track statistics from your NFL Fanstasy League
  The application's goal is to automate the process for NFL Fantasy player data collection, as well improve the research tools available for people who use NFL Fantasy. Statistics help users determine future draft, trade, and waiver-wire transaction for current and future seasons.
 
 ##### Dependencies:
-- NodeJS: Version 12.2 >= 
-    - Mongoose: Version 6.2 >=
+- NodeJS: Version 16.17.0 >= 
     - Puppeteer: Version 13.4 >=
-- MongoDB: Version 4.3 >=
-
 ##### Requirements:
 
 - NFL Fantasy Account with at least one season.
-- MongoDB account, *if database storage desired*.
-
 
 ### Installation 
 
@@ -30,11 +25,9 @@ From there navigate to the directory where the application resides
     
 Ensure that the proper node dependencies are installed
     
-    npm install puppeteer mongoose --save
+    npm install
     
 ### Running the application 
-
-##### To utilize the [MongoDB Atlas](https://www.mongodb.com/atlas/database) service:
 1. Sign up for an account
 2. Under the fantasy-stat-track/app/ directory create a file named `creds.js`
 
@@ -43,17 +36,11 @@ Ensure that the proper node dependencies are installed
   module.exports = {
     nflUsername: '<nfl-fantasy-account-username>',
     nflPassword: '<nfl-fantasy-account-password>',
-    dbUser: '<MongoDB-Atlas-database-user>',
-    dbName: '<MongoDB-Atlas-database-name>',
-    dbPassword: '<MongoDB-Atlas-database-password>'
   }
   
 ```
 
 > If you wish to contribute or make fork public, please make sure to add `creds.js` to your `.gitignore`
-
-
-#### Running the application
 
 Through the `node` command
     
@@ -65,8 +52,6 @@ Through the `node` command
 
 - Add testing suite to the project
 - Visualize the data, create insights, get information from multiple seasons
-- Include other fantasy football providers, such as ESPN and Yahoo
-
 
 
 **This application is in no way sponsored and/or endorsed by NFL Fantasy or its affiliates**
