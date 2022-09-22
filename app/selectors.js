@@ -1,7 +1,7 @@
 module.exports = {
-  username: '#gigya-loginID-60062076330815260',
-  password: '[placeholder="Password *"]',
-  submit: 'input[class="gigya-input-submit"][data-screenset-roles="instance"]',
+  username: 'input[type="email"]',
+  password: 'input[type="password"]',
+  submit: 'div[class="css-1dbjc4n r-1yzf0co"] > div[role="button"]',
   season: '.nameValue.first.last a', // Most recent season
   rosterPage: '.teamName.teamId-10',
   desiredWeek: 'a.w-14',
