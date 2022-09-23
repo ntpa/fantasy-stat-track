@@ -15,7 +15,6 @@ async function fantasyLoginPage (page,selectors, creds) {
     await page.waitForSelector(selectors.password)
     await page.type(selectors.username, creds.nflUsername, { delay: 50 })
     await page.type(selectors.password, creds.nflPassword, { delay: 50 })
-    await page.waitForSelector(selectors.submit)
     return Promise.all([page.waitForNavigation(), page.click(selectors.submit)])
   }
 

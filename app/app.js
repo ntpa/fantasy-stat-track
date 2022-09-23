@@ -28,19 +28,11 @@ function closeFileSync (file) {
 
   if (!fs.existsSync('./log')) {
     // create log directroy. Synchronous call because immediate use may happen
-    fs.mkdirSync('./log/')
+    fs.mkdirSync('./log/') // makes log directory where program is called
   }
 
   /** Filesystem Initialization **/
-  const fileError = path.resolve('log', './error.txt')
-  const fileOutput = path.resolve('log', './output.txt')
-  // Ensure files are clear from previous runs
-  if (fs.existsSync(fileError)) fs.truncateSync(fileError)
-  if (fs.existsSync(fileOutput)) fs.truncateSync(fileOutput)
-
-  // ---------------- ///
-
-
+  const fileError = path.resolve('log', './error.txt') // TODO: Add date (no timestamp)
   const browser = await puppeteer.launch({ headless: false })
   const page = await browser.newPage()
 
@@ -50,9 +42,9 @@ function closeFileSync (file) {
     // Go to your Team's Roster Page, where the players on one's team are shown
     await navigate.teamRosterPage(page, SELECTORS)
   } catch (error) {
-    fs.appendFileSync(fileError, 'Failed to navigate to team roster page.\n')
+    // only truncate file on first call to appendFileSync
+    fs.appendFileSync(fileError, 'Failed to navigate to team roster page.\n', {flag: "w"})
     fs.appendFileSync(fileError, String(`${error}\n`))
-    closeFileSync(fileOutput)
     closeFileSync(fileError)
     process.exit(1)
   }
@@ -66,24 +58,18 @@ function closeFileSync (file) {
     for (let i = 0; i < teamLinks.length; i++) {
       const teamPlayers = await retrieve.getPlayers(page, SELECTORS, teamLinks, i) // One team's set of players
 
-      for (let j = 0; j < teamPlayers.length; j++) { // go through all players on a team
-        const player = teamPlayers[j]
-        if (Number.isNaN(player.pointsTotal)) {
-          throw new Error('Player points total is not a number!\n')
-        }
-      }
-
       // JSON text file created for those who do not have DB or prefer to parse text
-      fs.appendFileSync(fileOutput, JSON.stringify(teamPlayers, null, 2))
+      const fileOutput = path.resolve('log', `${teamPlayers[0].leagueTeam}.json`)
+      fs.appendFileSync(fileOutput, JSON.stringify(teamPlayers, null, 2), {flag: "w"})
+      closeFileSync(fileOutput)
       teamPlayers.length = 0 // clear array
     }
   } catch (error) {
-    fs.appendFileSync(fileError, "Failed to get teams' information\n")
+    fs.appendFileSync(fileError, "Failed to get teams' information\n", {flag: "w"})
     fs.appendFileSync(fileError, String(`${error}\n`))
   } finally {
     // Close all streams, connections, and files
     closeFileSync(fileError)
-    closeFileSync(fileOutput)
     browser.close()
   }
 })()
