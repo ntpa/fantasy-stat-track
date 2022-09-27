@@ -18,6 +18,8 @@ $2 !~ "position" { points[$2] += $3; count[$2]++ }
 END {
       team_points = points["QB"] + points["RB"] + points["WR"] + points["TE"] + points["K "] + points["DEF"]
       printf("\nTotal Points: %.2f\n\n", team_points)
+      # 'Manual' printf chosen over for loop(x in y) control flow becauase order in which
+      # the subscripts are considered is implementation specific. 
       printf("%s Points: %.2f (%.2f%% of total)\n", "QB", points["QB"], points["QB"]/team_points*100)
       printf("%s Points: %.2f (%.2f%% of total)\n", "RB", points["RB"], points["RB"]/team_points*100)
       printf("%s Points: %.2f (%.2f%% of total)\n", "WR", points["WR"], points["WR"]/team_points*100)
@@ -26,10 +28,4 @@ END {
       printf("%s Points: %.2f (%.2f%% of total)\n", "DEF", points["DEF"], points["DEF"]/team_points*100)
       print ""
       
-      #printf("%s Avg: %.2f\n", "QB", points["QB"]/count["QB"])
-      #printf("%s Avg: %.2f\n", "RB", points["RB"]/count["RB"])
-      #printf("%s Avg: %.2f\n", "WR", points["WR"]/count["WR"])
-      #printf("%s Avg: %.2f\n", "TE", points["TE"]/count["TE"])
-      #printf("%s Avg: %.2f\n", "K ", points["WR"]/count["K "])
-      #printf("%s Avg: %.2f\n", "DEF", points["DEF"]/count["DEF"])
 }

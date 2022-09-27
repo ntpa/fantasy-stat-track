@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #
-# Filename: json_to_csv.sh
+# Filename: create_points_breakdown.sh
 # Author: NTPA
 # Date: September 25
 #
@@ -11,5 +11,12 @@
 #
 # Script must be called from directory containing .json files
 
+# Transfer to CSV format. 
+#   Command arguments -print0 and -0 chosen to allow for spaces
+#     in filename that is processed
+
 find -name "*.json" -print0 | xargs -0 -I {} basename {} .json | \
   xargs -t -I {} npx json2csv --quote "" -i {}.json -o {}.csv
+
+# Create points breakdown plain text files
+find -name "*.csv" -print0 | xargs -0 -I {} basename {} .csv | xargs -t -I {} sh -c '../../scripts/./points_breakdown.awk "{}".csv > Points_"{}".txt'
