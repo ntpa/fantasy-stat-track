@@ -43,7 +43,7 @@ function closeFileSync (file) {
     await navigate.teamRosterPage(page, SELECTORS)
   } catch (error) {
     // only truncate file on first call to appendFileSync
-    fs.appendFileSync(fileError, 'Failed to navigate to team roster page.\n', {flag: "w"})
+    fs.appendFileSync(fileError, 'Failed to navigate to team roster page.\n', { flag: 'w' })
     fs.appendFileSync(fileError, String(`${error}\n`))
     closeFileSync(fileError)
     process.exit(1)
@@ -59,13 +59,14 @@ function closeFileSync (file) {
       const teamPlayers = await retrieve.getPlayers(page, SELECTORS, teamLinks, i) // One team's set of players
 
       // JSON text file created for those who do not have DB or prefer to parse text
-      const fileOutput = path.resolve('log', `${teamPlayers[0].leagueTeam}.json`)
-      fs.appendFileSync(fileOutput, JSON.stringify(teamPlayers, null, 2), {flag: "w"})
+      const today = new Date().toISOString().slice(0, 10)
+      const fileOutput = path.resolve('log', today, `_${teamPlayers[0].leagueTeam}.json`)
+      fs.appendFileSync(fileOutput, JSON.stringify(teamPlayers, null, 2), { flag: 'w' })
       closeFileSync(fileOutput)
       teamPlayers.length = 0 // clear array
     }
   } catch (error) {
-    fs.appendFileSync(fileError, "Failed to get teams' information\n", {flag: "w"})
+    fs.appendFileSync(fileError, "Failed to get teams' information\n", { flag: 'w' })
     fs.appendFileSync(fileError, String(`${error}\n`))
   } finally {
     // Close all streams, connections, and files
