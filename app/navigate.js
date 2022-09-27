@@ -29,8 +29,11 @@ async function teamRosterPage (page, selectors, url) {
   await page.goto(`${FANTASY_SITE_URL}${leagueLink}`, { waitUntil: 'load' })
 
   // Go to week that is most representative of team roster
-  // Developer has decided that the last regular season game(week 14) roster satisfies the above criteria best
+
+  /* The below page.$eval call may fail due to incorrect week in url string that is 
+   * passed in . Please refer to selectors.js for more information on how to fix */  
   const rosterLink = await page.$eval(selectors.desiredWeek, (a) => a.getAttribute('href'))
+
   await page.goto(`${FANTASY_SITE_URL}${rosterLink}`, { waitUntil: 'load' })
 }
 /* --------------------------------------------

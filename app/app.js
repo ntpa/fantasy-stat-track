@@ -60,7 +60,10 @@ function closeFileSync (file) {
 
       // JSON text file created for those who do not have DB or prefer to parse text
       const today = new Date().toISOString().slice(0, 10)
-      const fileOutput = path.resolve('log', today, `_${teamPlayers[0].leagueTeam}.json`)
+      const separator = "_"
+      const team = `${teamPlayers[0].leagueTeam}`
+      const ext = ".json"
+      const fileOutput = path.resolve("log", "./" + today.concat(separator, team, ext))
       fs.appendFileSync(fileOutput, JSON.stringify(teamPlayers, null, 2), { flag: 'w' })
       closeFileSync(fileOutput)
       teamPlayers.length = 0 // clear array
