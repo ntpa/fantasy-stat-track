@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #
-# Filename: create_points_breakdown.sh
+# Filename: create_point_breakdowns.sh
 # Author: NTPA
 # Date: September 25
 #
