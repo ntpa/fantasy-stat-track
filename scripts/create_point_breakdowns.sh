@@ -19,4 +19,4 @@ find -name "*.json" -print0 | xargs -0 -I {} basename {} .json | \
   xargs -t -I {} npx json2csv --quote "" -i {}.json -o {}.csv
 
 # Create points breakdown plain text files
-find -name "*.csv" -print0 | xargs -0 -I {} basename {} .csv | xargs -t -I {} sh -c '../../scripts/./points_breakdown.awk "{}".csv > Points_"{}".txt'
+find -name "*.csv" -print0 | xargs -0 -I {} basename {} .csv | xargs -t -I {} sh -c '../../scripts/./point_breakdown.awk "{}".csv > Points_"{}".txt'
