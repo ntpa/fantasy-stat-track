@@ -30,6 +30,9 @@ function closeFileSync (file) {
     // create log directroy. Synchronous call because immediate use may happen
     fs.mkdirSync('./log/') // makes log directory where program is called
   }
+  if (!fs.existsSync('./output')) {
+    fs.mkdirSync('./output')
+  }
 
   /** Filesystem Initialization **/
   const fileError = path.resolve('log', './error.txt') // TODO: Add date (no timestamp)
@@ -63,7 +66,7 @@ function closeFileSync (file) {
       const separator = "_"
       const team = `${teamPlayers[0].leagueTeam}`
       const ext = ".json"
-      const fileOutput = path.resolve("log", "./" + today.concat(separator, team, ext))
+      const fileOutput = path.resolve("output", "./" + today.concat(separator, team, ext))
       fs.appendFileSync(fileOutput, JSON.stringify(teamPlayers, null, 2), { flag: 'w' })
       closeFileSync(fileOutput)
       teamPlayers.length = 0 // clear array
