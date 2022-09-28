@@ -20,12 +20,12 @@ END {
       printf("\nTotal Points: %.2f\n\n", team_points)
       # 'Manual' printf chosen over for loop(x in y) control flow becauase order in which
       # the subscripts are considered is implementation specific. 
-      printf("%s Points: %.2f (%.2f%% of team's total)\n", "QB", points["QB"], points["QB"]/team_points*100)
-      printf("%s Points: %.2f (%.2f%% of team's total)\n", "RB", points["RB"], points["RB"]/team_points*100)
-      printf("%s Points: %.2f (%.2f%% of team's total)\n", "WR", points["WR"], points["WR"]/team_points*100)
-      printf("%s Points: %.2f (%.2f%% of team's total)\n", "TE", points["TE"], points["TE"]/team_points*100)
-      printf("%s Points: %.2f (%.2f%% of team's total)\n", "K ", points["K "], points["K "]/team_points*100)
-      printf("%s Points: %.2f (%.2f%% of team's total)\n", "DEF", points["DEF"], points["DEF"]/team_points*100)
+      printf("%s Points: %.2f (%d%% of team total)\n", "QB", points["QB"], points["QB"]/team_points*100)
+      printf("%s Points: %.2f (%d%% of team total)\n", "RB", points["RB"], points["RB"]/team_points*100)
+      printf("%s Points: %.2f (%d%% of team total)\n", "WR", points["WR"], points["WR"]/team_points*100)
+      printf("%s Points: %.2f (%d%% of team total)\n", "TE", points["TE"], points["TE"]/team_points*100)
+      printf("%s Points: %.2f (%d%% of team total)\n", "K ", points["K "], points["K "]/team_points*100)
+      printf("%s Points: %.2f (%d%% of team total)\n", "DEF", points["DEF"], points["DEF"]/team_points*100)
       print ""
       
 }
