@@ -57,7 +57,7 @@ If an error occurs, the file error.txt will be in the log directory, which is cr
 
         ../../scripts/./create_points_breakdown.sh && ../../scripts/./rank_points_breakdown.sh    
 
-6. Enjoy the simple plain text statistics on fantasy team's in your league
+6. Enjoy the simple plain text statistics on fantasy teams in your league
 
 ---     
     
