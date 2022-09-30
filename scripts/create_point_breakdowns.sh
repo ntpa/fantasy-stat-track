@@ -15,8 +15,14 @@
 #   Command arguments -print0 and -0 chosen to allow for spaces
 #     in filename that is processed
 
-find -name "*.json" -print0 | xargs -0 -I {} basename {} .json | \
+# TODO: 
+#     - Do not perform the .json -> .csv -> Points* process on files not created today
+
+
+current_date=$(date "+%Y-%m-%d")
+
+find -name "${current_date}*.json" -print0 | xargs -0 -I {} basename {} .json | \
   xargs -t -I {} npx json2csv --quote "" -i {}.json -o {}.csv
 
 # Create points breakdown plain text files
-find -name "*.csv" -print0 | xargs -0 -I {} basename {} .csv | xargs -t -I {} sh -c '../../scripts/./point_breakdown.awk "{}".csv > Points_"{}".txt'
+find -name "${current_date}*.csv" -print0 | xargs -0 -I {} basename {} .csv | xargs -t -I {} sh -c '../../scripts/./point_breakdown.awk "{}".csv > Points_"{}".txt'
