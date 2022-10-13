@@ -28,14 +28,16 @@ async function getLinks (page, selector) {
   await page.waitForSelector(selector)
   await page.$eval(selector, (span) => {
     return span.children.length
-  }).then((numberOfLinks) => {
+  }).then((numberOfTeams) => {
     const templateLink = page.url()
-    for (let i = 1; i < numberOfLinks + 1; i++) { // Start at i=1 due to NFL URL Formation
+    for (let i = 1; i < numberOfTeams + 1; i++) { // Start at i=1 due to NFL URL Formation
       getTeamID(templateLink).then((teamID) => {
         // Numeric identifier represents team in league
         // Number of teams typically range from 8 - 14 teams, so reprenseted by single or double digit identifier in URL
-        teamLinks.push(templateLink.replace(teamID, `/team/${i}?`))
-        // Double digits if more than 9 teams in league, otherwise one digit
+        let teamLink = templateLink.replace(teamID, `/team/${i}?`)
+        
+        // trim zero at the end[BUG]
+        teamLinks.push(teamLink.substring(0,teamLink.length - 1))
       })
     }
   })

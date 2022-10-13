@@ -35,14 +35,15 @@ function closeFileSync (file) {
   }
 
   /** Filesystem Initialization **/
-  const fileError = path.resolve('log', './error.txt') // TODO: Add date (no timestamp)
+  const today = new Date().toISOString().slice(0, 10)
+  const separator = '_'
+  const fileError = path.resolve('log', './' + today.concat(separator, 'error.txt'))
   const browser = await puppeteer.launch({ headless: false })
   const page = await browser.newPage()
-
   try {
     // Attempt to Login to fantasy site
     await navigate.fantasyLoginPage(page, SELECTORS, CREDS)
-    // Go to your Team's Roster Page, where the players on one's team are shown
+    // Go to Team Roster Page, where the players on one's team are shown
     await navigate.teamRosterPage(page, SELECTORS)
   } catch (error) {
     // only truncate file on first call to appendFileSync
@@ -62,11 +63,9 @@ function closeFileSync (file) {
       const teamPlayers = await retrieve.getPlayers(page, SELECTORS, teamLinks, i) // One team's set of players
 
       // JSON text file created for those who do not have DB or prefer to parse text
-      const today = new Date().toISOString().slice(0, 10)
-      const separator = "_"
       const team = `${teamPlayers[0].leagueTeam}`
-      const ext = ".json"
-      const fileOutput = path.resolve("output", "./" + today.concat(separator, team, ext))
+      const ext = '.json'
+      const fileOutput = path.resolve('output', './' + today.concat(separator, team, ext))
       fs.appendFileSync(fileOutput, JSON.stringify(teamPlayers, null, 2), { flag: 'w' })
       closeFileSync(fileOutput)
       teamPlayers.length = 0 // clear array
