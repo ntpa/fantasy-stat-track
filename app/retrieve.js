@@ -53,7 +53,8 @@ async function getLinks (page, selector) {
 async function getPlayers (page, selectors, teamLinks, index) {
   const players = []
 
-  await page.goto(teamLinks[index], { waitUntil: 'load' })
+  await page.goto(teamLinks[index], { waitUntil: 'domcontentloaded' })
+  await page.waitForSelector(selectors.teamName)
   await Promise.all([getNames(page, selectors.playerNameAndInfo[0]),
     getPositions(page, selectors.playerNameAndInfo[1]),
     getTotalPoints(page, selectors.playerTotalPoints),
