@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #
 # Filename: create_point_breakdowns.sh
@@ -14,9 +14,6 @@
 # Transfer to CSV format. 
 #   Command arguments -print0 and -0 chosen to allow for spaces
 #     in filename that is processed
-
-# TODO: 
-#     - Do not perform the .json -> .csv -> Points* process on files not created today
 
 
 current_date=$(date "+%Y-%m-%d")
