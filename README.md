@@ -52,10 +52,9 @@ If an error occurs, the file error.txt will be in the log directory, which is cr
 
         cd output    
     
-5. Run the shell scripts in scripts/ to populate points and rank breakdowns. Before running the commands below    
- please go to `rank_points_breakdown.sh` and **update the "filenames" variable with desired filename(s)**. Check the source file for more details.
+5. Run the shell scripts in scripts/ to populate points and rank breakdowns.
 
-        ../../scripts/./create_points_breakdown.sh && ../../scripts/./rank_points_breakdown.sh    
+        ../../scripts/./create_point_breakdowns.sh && ../../scripts/./rank_point_breakdowns.sh    
 
 6. Enjoy the simple plain text statistics on fantasy teams in your league
 
