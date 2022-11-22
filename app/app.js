@@ -34,48 +34,41 @@ function closeFileSync (file) {
     fs.mkdirSync('./output')
   }
 
-  /** Filesystem Initialization **/
+  /** File Initialization **/
   const today = new Date().toISOString().slice(0, 10)
   const separator = '_'
   const fileError = path.resolve('log', './' + today.concat(separator, 'error.txt'))
+  const fileOutput = path.resolve('output', './' + today.concat(separator, 'output.json'))
+
+  /** Browser Initialization **/
   const browser = await puppeteer.launch({ headless: false })
   const page = await browser.newPage()
+  page.setDefaultTimeout(20000) // modify, depending on resource speed(e.g network or cpu speed)
+
+  const leaguePlayers = []
+
   try {
     // Attempt to Login to fantasy site
-    await navigate.fantasyLoginPage(page, SELECTORS, CREDS)
     // Go to Team Roster Page, where the players on one's team are shown
-    await navigate.teamRosterPage(page, SELECTORS)
+    await navigate.goToCurrentSeasonRoster(page, SELECTORS, CREDS)
+
+    // return an array of URLs, which point to each team's roster page
+    const teamLinks = await retrieve.getLinks(page, 'div .selecter-options')
+    for (let i = 0; i < teamLinks.length; i++) {
+      const teamPlayers = await retrieve.getPlayers(page, SELECTORS, teamLinks, i) // One team's set of players
+      // add team's players to league pool
+      for (const player of teamPlayers) {
+        leaguePlayers.push(player)
+      }
+    }
+    fs.appendFileSync(fileOutput, JSON.stringify(leaguePlayers, null, 2), { flag: 'ax+' })
   } catch (error) {
     // only truncate file on first call to appendFileSync
     fs.appendFileSync(fileError, 'Failed to navigate to team roster page.\n', { flag: 'w' })
     fs.appendFileSync(fileError, String(`${error}\n`))
-    closeFileSync(fileError)
-    process.exit(1)
-  }
-
-  // Retrieve player stats from every team in a league
-
-  try {
-    const teamLinks = await retrieve.getLinks(page, 'div .selecter-options')
-
-    // Go through all rosters and get all player's information
-    for (let i = 0; i < teamLinks.length; i++) {
-      const teamPlayers = await retrieve.getPlayers(page, SELECTORS, teamLinks, i) // One team's set of players
-
-      // JSON text file created for those who do not have DB or prefer to parse text
-      const team = `${teamPlayers[0].leagueTeam}`
-      const ext = '.json'
-      const fileOutput = path.resolve('output', './' + today.concat(separator, team, ext))
-      fs.appendFileSync(fileOutput, JSON.stringify(teamPlayers, null, 2), { flag: 'w' })
-      closeFileSync(fileOutput)
-      teamPlayers.length = 0 // clear array
-    }
-  } catch (error) {
-    fs.appendFileSync(fileError, "Failed to get teams' information\n", { flag: 'w' })
-    fs.appendFileSync(fileError, String(`${error}\n`))
   } finally {
-    // Close all streams, connections, and files
     closeFileSync(fileError)
+    closeFileSync(fileOutput)
     browser.close()
   }
 })()

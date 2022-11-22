@@ -36,6 +36,11 @@ async function getLinks (page, selector) {
         // Number of teams typically range from 8 - 14 teams, so reprenseted by single or double digit identifier in URL
         let teamLink = templateLink.replace(teamID, `/team/${i}?`)
         
+        // Below fixes error: 
+        //  - After thursday night game, roster page for the current week shows 
+        //    points total to be that of the current week(zero until player has played)
+        //  - Hacky fix, TODO
+        teamLink += "statCategory=stats&statSeason=2022&statType=seasonStats&week=17"
         // trim zero at the end[BUG]
         teamLinks.push(teamLink.substring(0,teamLink.length - 1))
       })
