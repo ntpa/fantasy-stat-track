@@ -1,12 +1,12 @@
-const puppeteer = require('puppeteer')
-const fs = require('fs')
-const path = require('path/posix') // conform to POSIX
+import puppeteer from 'puppeteer'
+import fs from 'node:fs'
+import path from 'node:path/posix'
 
 // User generated files
-const CREDS = require('./creds.js')
-const SELECTORS = require('./selectors.js')
-const retrieve = require('./retrieve.js')
-const navigate = require('./navigate.js')
+import * as CREDS from './creds.js'
+import * as SELECTORS from './selectors.js'
+import * as retrieve from './retrieve.js'
+import * as navigate from './navigate.js'
 
 function closeFileSync (file) {
   if (!fs.existsSync(file)) {
@@ -51,9 +51,8 @@ function closeFileSync (file) {
     // Attempt to Login to fantasy site
     // Go to Team Roster Page, where the players on one's team are shown
     await navigate.goToCurrentSeasonRoster(page, SELECTORS, CREDS)
+    const teamLinks = await retrieve.getLinks(page, SELECTORS.links)
 
-    // return an array of URLs, which point to each team's roster page
-    const teamLinks = await retrieve.getLinks(page, 'div .selecter-options')
     for (let i = 0; i < teamLinks.length; i++) {
       const teamPlayers = await retrieve.getPlayers(page, SELECTORS, teamLinks, i) // One team's set of players
       // add team's players to league pool
@@ -64,7 +63,7 @@ function closeFileSync (file) {
     fs.appendFileSync(fileOutput, JSON.stringify(leaguePlayers, null, 2), { flag: 'ax+' })
   } catch (error) {
     // only truncate file on first call to appendFileSync
-    fs.appendFileSync(fileError, 'Failed to navigate to team roster page.\n', { flag: 'w' })
+    fs.appendFileSync(fileError, 'Failed to retrieve league players.\n', { flag: 'w' })
     fs.appendFileSync(fileError, String(`${error}\n`))
   } finally {
     closeFileSync(fileError)

@@ -10,9 +10,8 @@ const LOGIN_URL = 'https://fantasy.nfl.com/account/sign-in?s=fantasy&returnTo=ht
 async function fantasyLoginPage (page, selectors, creds) {
   await page.goto(LOGIN_URL, { waitUntil: 'load' })
   await page.waitForSelector(selectors.username)
-  await page.waitForSelector(selectors.password)
-  await page.type(selectors.username, creds.nflUsername, { delay: 50 })
-  await page.type(selectors.password, creds.nflPassword, { delay: 50 })
+  await page.type(selectors.username, creds.nflUsername, { delay: 20 })
+  await page.type(selectors.password, creds.nflPassword, { delay: 20 })
   return Promise.all([page.waitForNavigation(), page.click(selectors.submit)])
 }
 
@@ -47,4 +46,4 @@ async function goToCurrentSeasonRoster (page, selectors, creds) {
 /* --------------------------------------------
  * ------------------------------------- */
 
-module.exports = { goToCurrentSeasonRoster }
+export { goToCurrentSeasonRoster };

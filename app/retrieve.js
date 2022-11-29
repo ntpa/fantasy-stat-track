@@ -32,40 +32,13 @@ async function getLinks (page, selector) {
     const templateLink = page.url()
     for (let i = 1; i < numberOfTeams + 1; i++) { // Start at i=1 due to NFL URL Formation
       getTeamID(templateLink).then((teamID) => {
-        // Numeric identifier represents team in league
-        // Number of teams typically range from 8 - 14 teams, so reprenseted by single or double digit identifier in URL
-        let teamLink = templateLink.replace(teamID, `/team/${i}?`)
-        
-        // trim zero at the end[BUG]
-        teamLinks.push(teamLink.substring(0,teamLink.length - 1))
+      let teamLink = templateLink.replace(teamID, `/team/${i}?`)
+      // trim zero at the end[BUG]
+      teamLinks.push(teamLink.substring(0,teamLink.length - 1))
       })
     }
   })
   return teamLinks
-}
-
-// Return array of Player objects
-// Function arguements:
-//  - page: current page
-//  - selectors: CSS selectors for player's name, position, total points and team name
-//  - teamLinks: array of links to all teams' roster page
-//  - index: position in teamLinks array
-async function getPlayers (page, selectors, teamLinks, index) {
-  const players = []
-
-  await page.goto(teamLinks[index], { waitUntil: 'domcontentloaded' })
-  await page.waitForSelector(selectors.teamName)
-  await Promise.all([getNames(page, selectors.playerNameAndInfo[0]),
-    getPositions(page, selectors.playerNameAndInfo[1]),
-    getTotalPoints(page, selectors.playerTotalPoints),
-    getTeamName(page, selectors.teamName)
-  ]).then((results) => {
-    const length = results[0].length // results[0] results[1] and results[2] all have same lengths
-    for (let i = 0; i < length; i++) {
-      players.push(new Player(results[0][i], results[1][i], results[2][i], results[3]))
-    }
-  })
-  return players
 }
 
 // Return array of player names
@@ -125,4 +98,29 @@ function getTeamName (page, selector) {
   return page.$eval(selector, (span) => span.textContent)
 }
 
-module.exports = { getNames, getPositions, getTotalPoints, getTeamName, getLinks, getPlayers }
+// Return array of Player objects
+// Function arguements:
+//  - page: current page
+//  - selectors: CSS selectors for player's name, position, total points and team name
+//  - teamLinks: array of links to all teams' roster page
+//  - index: position in teamLinks array
+async function getPlayers (page, selectors, teamLinks, index) {
+  const players = []
+  await page.goto(teamLinks[index], { waitUntil: 'domcontentloaded' })
+  await page.waitForSelector(selectors.teamName)
+
+  await Promise.all([getNames(page, selectors.playerNameAndInfo[0]),
+    getPositions(page, selectors.playerNameAndInfo[1]),
+    getTotalPoints(page, selectors.playerTotalPoints),
+    getTeamName(page, selectors.teamName)
+
+  ]).then((results) => {
+    const length = results[0].length // results[0] results[1] and results[2] all have same lengths
+    for (let i = 0; i < length; i++) {
+      players.push(new Player(results[0][i], results[1][i], results[2][i], results[3]))
+    }
+  })
+  return players
+}
+
+export { getNames, getPositions, getTotalPoints, getTeamName, getLinks, getPlayers };
