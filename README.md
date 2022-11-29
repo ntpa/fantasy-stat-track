@@ -32,11 +32,10 @@ Ensure that the proper node dependencies are installed
 2. Under the fantasy-stat-track/app/ directory create a file named `creds.js`    
     
 ```javascript    
+    nflUsername: '<nfl-fantasy-account-username>'    
+    nflPassword: '<nfl-fantasy-account-password>' 
     
-  module.exports = {    
-    nflUsername: '<nfl-fantasy-account-username>',    
-    nflPassword: '<nfl-fantasy-account-password>',    
-  }    
+    export { nflUsername, nflPassword }
     
 ```    
     
@@ -54,9 +53,10 @@ If an error occurs, the file error.txt will be in the log directory, which is cr
     
 5. Run the shell scripts in scripts/ to populate points and rank breakdowns.
 
-        ../../scripts/./create_point_breakdowns.sh && ../../scripts/./rank_point_breakdowns.sh    
+        python ../../scripts/json2csv.py '<YYYY-MM-DD_output.json>'
+        python ../../scripts/csv2rankings.py '<YYYY-MM-DD_output.csv>' > '<your-output-file>'
 
-6. Enjoy the simple plain text statistics on fantasy teams in your league
+6. Enjoy the simple plain text rankings on fantasy players in your league
 
 ---     
     
@@ -64,6 +64,7 @@ If an error occurs, the file error.txt will be in the log directory, which is cr
     
 - Visualize the data, create better insights
 - Receive user recommendations 
-    
+- If you wish to contribute or give suggestions, please reach out!
+
 **This application is in no way sponsored and/or endorsed by NFL Fantasy or its affiliates**    
 
