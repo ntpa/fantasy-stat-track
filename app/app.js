@@ -8,31 +8,15 @@ import * as SELECTORS from './selectors.js'
 import * as retrieve from './retrieve.js'
 import * as navigate from './navigate.js'
 
-function closeFileSync (file) {
-  if (!fs.existsSync(file)) {
-    // file does not exists so no need to close
-    // ex. code below will throw error in attempt to close file that is not created
-    return
-  }
-  fs.open(file, (err, fd) => {
-    if (err) throw err
-    // use path of file
-    fs.closeSync(fd, (err) => {
-      if (err) throw err
-    })
-  })
-}
-
 (async () => {
   'use strict'
 
-  if (!fs.existsSync('./log')) {
-    // create log directroy. Synchronous call because immediate use may happen
-    fs.mkdirSync('./log/') // makes log directory where program is called
-  }
-  if (!fs.existsSync('./output')) {
-    fs.mkdirSync('./output')
-  }
+  fs.mkdir('./output', (err) => {
+    if (err) {
+      throw err
+    }
+  });
+
 
   /** File Initialization **/
   const today = new Date().toISOString().slice(0, 10)
@@ -60,14 +44,15 @@ function closeFileSync (file) {
         leaguePlayers.push(player)
       }
     }
-    fs.appendFileSync(fileOutput, JSON.stringify(leaguePlayers, null, 2), { flag: 'ax+' })
+    fs.appendFile(fileOutput, JSON.stringify(leaguePlayers, null, 2), (err) => {
+      if (err) throw err; 
+      console.log(`Saved file ${fileOutput}`)
+    });
   } catch (error) {
     // only truncate file on first call to appendFileSync
-    fs.appendFileSync(fileError, 'Failed to retrieve league players.\n', { flag: 'w' })
-    fs.appendFileSync(fileError, String(`${error}\n`))
+    console.log('Failed to retrieve league players.\n')
+    console.log(error)
   } finally {
-    closeFileSync(fileError)
-    closeFileSync(fileOutput)
     browser.close()
   }
 })()
