@@ -1,27 +1,39 @@
 import puppeteer from 'puppeteer'
 import fs from 'node:fs'
+import fsPromises from 'node:fs/promises'
 import path from 'node:path/posix'
+import * as readline from 'node:readline/promises'
 
-// User generated files
 import * as CREDS from './creds.js'
 import * as SELECTORS from './selectors.js'
 import * as retrieve from './retrieve.js'
 import * as navigate from './navigate.js'
 
+
+
 (async () => {
   'use strict'
 
-  fs.mkdir('./output', (err) => {
-    if (err) {
-      throw err
-    }
-  })
+  let outputDirectory = 'output'
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 
   /** File Initialization **/
+  if (fs.existsSync(outputDirectory)) {
+    console.log(outputDirectory, 'directory already exists.')
+    const newDirectory = await rl.question("Please give name of the new directory(without spaces) for the program to use: ")
+    
+    try { await fsPromises.mkdir(newDirectory, {recursive: false}) /* rejection if directory exists */ }
+    catch (err) { console.log(newDirectory, 'directory already exists. Please run again, and choose a different name.'); process.exit(1)}
+
+    console.log(`created directory ${newDirectory}`)
+    outputDirectory = newDirectory
+  }
+  rl.close()
+
   const today = new Date().toISOString().slice(0, 10)
   const separator = '_'
-  const filePlayerOutput = path.resolve('output', './' + today.concat(separator, 'playerOutput.json'))
-  const fileStandingOutput = path.resolve('output', './' + today.concat(separator, 'standingOutput.json'))
+  const filePlayerOutput = path.resolve(outputDirectory, './' + today.concat(separator, 'playerOutput.json'))
+  const fileStandingOutput = path.resolve(outputDirectory, './' + today.concat(separator, 'standingOutput.json'))
 
   /** Browser Initialization **/
   const browser = await puppeteer.launch({ headless: false })
@@ -51,13 +63,12 @@ import * as navigate from './navigate.js'
 
       fs.appendFile(fileStandingOutput, `${teamRank}\t${teamName}\t${teamRecord}\n`, (err) => {
         if (err) throw err
-      });
+      })
     }
 
-      fs.appendFile(filePlayerOutput, JSON.stringify(leaguePlayers, null, 2), (err) => {
-        if (err) throw err
-        
-      });
+    fs.appendFile(filePlayerOutput, JSON.stringify(leaguePlayers, null, 2), (err) => {
+      if (err) throw err
+    })
   } catch (error) {
     // only truncate file on first call to appendFileSync
     console.log('Failed to retrieve league players.\n')
