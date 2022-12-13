@@ -44,7 +44,10 @@ Ensure that the proper node dependencies are installed
 3. Through the `node` command in the app/ directory    
 
         node app.js    
-    
+ 
+**Note: If you notice(while running app.js) that the web page has gone blank, refresh the browser page and proper execution should continue**
+
+
 If an error occurs, the file error.txt will be in the log directory, which is created in the directory the command above is run. Please read the error output in the error.txt. *Usually a re-run will fix any unexpected errors*. 
     
 4. If successful operation, change your directory to where the output files will be    
