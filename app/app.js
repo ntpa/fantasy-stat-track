@@ -52,11 +52,12 @@ import * as navigate from './navigate.js'
       fs.appendFile(fileStandingOutput, `${teamRank}\t${teamName}\t${teamRecord}\n`, (err) => {
         if (err) throw err
       });
-      fs.appendFile(filePlayerOutput, JSON.stringify(leaguePlayers, null, 2), (err) => {
-        if (err) throw err
-      });
     }
 
+      fs.appendFile(filePlayerOutput, JSON.stringify(leaguePlayers, null, 2), (err) => {
+        if (err) throw err
+        
+      });
   } catch (error) {
     // only truncate file on first call to appendFileSync
     console.log('Failed to retrieve league players.\n')
