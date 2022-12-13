@@ -31,7 +31,7 @@ async function teamRosterPage (page, selectors) {
 
   await page.waitForSelector(selectors.rosterPage)
   const leagueLink = await page.$eval(selectors.rosterPage, (a) => a.getAttribute('href'))
-  await page.goto(`${FANTASY_SITE_URL}${leagueLink}`, { waitUntil: 'load' })
+  await page.goto(`${FANTASY_SITE_URL}${leagueLink}`, { waitUntil: 'networkidle0' })
 }
 
 /* Go to your team's roster page for the current season. */

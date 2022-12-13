@@ -32,9 +32,9 @@ async function getLinks (page, selector) {
     const templateLink = page.url()
     for (let i = 1; i < numberOfTeams + 1; i++) { // Start at i=1 due to NFL URL Formation
       getTeamID(templateLink).then((teamID) => {
-      let teamLink = templateLink.replace(teamID, `/team/${i}?`)
-      // trim zero at the end[BUG]
-      teamLinks.push(teamLink.substring(0,teamLink.length - 1))
+        const teamLink = templateLink.replace(teamID, `/team/${i}?`)
+        // trim zero at the end[BUG]
+        teamLinks.push(teamLink.substring(0, teamLink.length - 1))
       })
     }
   })
@@ -106,9 +106,9 @@ function getTeamName (page, selector) {
 //  - index: position in teamLinks array
 async function getPlayers (page, selectors, teamLinks, index) {
   const players = []
-  await page.goto(teamLinks[index], { waitUntil: 'domcontentloaded' })
-  await page.waitForSelector(selectors.teamName)
-
+  debugger;
+  await page.goto(teamLinks[index], { waitUntil: 'domcontentloaded'})
+  await page.waitForSelector(selectors.teamName) // bug on this selector
   await Promise.all([getNames(page, selectors.playerNameAndInfo[0]),
     getPositions(page, selectors.playerNameAndInfo[1]),
     getTotalPoints(page, selectors.playerTotalPoints),
@@ -123,4 +123,20 @@ async function getPlayers (page, selectors, teamLinks, index) {
   return players
 }
 
-export { getNames, getPositions, getTotalPoints, getTeamName, getLinks, getPlayers };
+// The two functions below assume that they are called
+// in page context with(or after) retrieve.getPlayers
+
+async function getTeamRecord (page, selectors) {
+  await page.waitForSelector(selectors.teamRank)
+  return page.$eval(selectors.teamRecord, (span) => span.textContent)
+}
+
+async function getTeamRank (page, selectors) {
+  await page.waitForSelector(selectors.teamRank)
+  return page.$eval(selectors.teamRank, (span) => span.textContent)
+}
+
+export {
+  getNames, getPositions, getTotalPoints, getTeamName, getLinks, getPlayers,
+  getTeamRecord, getTeamRank
+}
