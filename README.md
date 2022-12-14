@@ -55,6 +55,7 @@ If an error occurs, the file error.txt will be in the log directory, which is cr
         cd <output-directory>    
     
 5. Run the shell scripts in scripts/ to populate points and rank breakdowns. 
+
         python ../../scripts/json2rankings.py 'YYYY-MM-DD_playerOutput.json'
 
         *** OR *** 
