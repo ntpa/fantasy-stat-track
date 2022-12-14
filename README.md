@@ -54,10 +54,13 @@ If an error occurs, the file error.txt will be in the log directory, which is cr
 
         cd <output-directory>    
     
-5. Run the shell scripts in scripts/ to populate points and rank breakdowns.
+5. Run the shell scripts in scripts/ to populate points and rank breakdowns. 
+        python ../../scripts/json2rankings.py 'YYYY-MM-DD_playerOutput.json'
 
-        python ../../scripts/json2csv.py '<YYYY-MM-DD_output.json>'
-        python ../../scripts/csv2rankings.py '<YYYY-MM-DD_output.csv>' > '<your-output-file>'
+        *** OR *** 
+
+        python ../../scripts/json2csv.py '<YYYY-MM-DD_playerOutput.json>'
+        python ../../scripts/csv2rankings.py 'YYYY-MM-DD_output.csv'
 
 6. Enjoy the simple plain text rankings on fantasy players in your league
 
