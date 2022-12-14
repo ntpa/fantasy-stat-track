@@ -5,7 +5,7 @@ Track statistics from your NFL Fanstasy League
  The application's goal is to be a tool to help make trade and roster decisions for people who use NFL Fantasy. Hopefully the application will help users determine future draft, trade, and waiver-wire transaction for current and future seasons.
     
 ##### Dependencies:    
-- NodeJS: Version 16.17.0 >=    
+- NodeJS: Version 17.0.0 >=    
     - Puppeteer: Version 13.4 >=    
 ##### Requirements:    
     
@@ -52,7 +52,7 @@ If an error occurs, the file error.txt will be in the log directory, which is cr
     
 4. If successful operation, change your directory to where the output files will be    
 
-        cd output    
+        cd <output-directory>    
     
 5. Run the shell scripts in scripts/ to populate points and rank breakdowns.
 
