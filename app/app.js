@@ -25,7 +25,7 @@ import * as navigate from './navigate.js'
     try { await fsPromises.mkdir(newDirectory, {recursive: false}) /* rejection if directory exists */ }
     catch (err) { console.log(newDirectory, 'directory already exists. Please run again, and choose a different name.'); process.exit(1)}
 
-    console.log(`created directory ${newDirectory}`)
+    console.log(`created directory: ${newDirectory}`)
     outputDirectory = newDirectory
   }
   rl.close()
@@ -64,15 +64,20 @@ import * as navigate from './navigate.js'
       fs.appendFile(fileStandingOutput, `${teamRank}\t${teamName}\t${teamRecord}\n`, (err) => {
         if (err) throw err
       })
-    }
+    } /* end of for loop */
 
     fs.appendFile(filePlayerOutput, JSON.stringify(leaguePlayers, null, 2), (err) => {
       if (err) throw err
     })
   } catch (error) {
-    // only truncate file on first call to appendFileSync
     console.log('Failed to retrieve league players.\n')
     console.log(error)
+    // clean up 
+    fs.rmdir(outputDirectory, { recursive: true, force: true }, (err) => {
+      if (err) throw err
+      console.log(`Removed directory: ${outputDirectory}`)
+    })
+
   } finally {
     browser.close()
   }
