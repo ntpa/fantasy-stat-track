@@ -8,7 +8,7 @@
   // desiredWeek - the week number at the end of the url must be the current week, in order for the selector 
   // to be valid. For example, if the current week is week 4, and the below url specifies week 3. An error will 
   // be thrown during a function call teamRosterPage in navigate.js.
-  const desiredWeek = 'a[href="/league/6255172/team/10?statCategory=stats&statSeason=2022&statType=seasonStats&week=16"]'
+  const desiredWeek = 'li#st2022 a'
   const teamName = '.selecter-selected .label'
   const playerNameAndInfo = ['tbody td.playerNameAndInfo a.playerCard.playerName.playerNameFull', 'tbody td.playerNameAndInfo em']
   const playerTotalPoints = 'tbody td.stat.statTotal.numeric.last'

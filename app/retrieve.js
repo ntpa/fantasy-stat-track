@@ -106,9 +106,17 @@ function getTeamName (page, selector) {
 //  - index: position in teamLinks array
 async function getPlayers (page, selectors, teamLinks, index) {
   const players = []
-  debugger;
   await page.goto(teamLinks[index], { waitUntil: 'domcontentloaded'})
-  await page.waitForSelector(selectors.teamName) // bug on this selector
+
+  // click and go to
+  await Promise.all([
+    // race condition may happen if waitUntil waits less time
+    page.waitForNavigation({ waitUntil: 'networkidle0'}),
+    page.click(selectors.desiredWeek) 
+  ])
+
+  /
+
   await Promise.all([getNames(page, selectors.playerNameAndInfo[0]),
     getPositions(page, selectors.playerNameAndInfo[1]),
     getTotalPoints(page, selectors.playerTotalPoints),
