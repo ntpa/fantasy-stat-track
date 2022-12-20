@@ -5,13 +5,13 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "removeComments": true,
-    "preserveConstEnums": true,
+    "preserveConstEnums": true
   },
   "files": [
-    "app/app.ts",
-    "app/creds.ts",
-    "app/navigate.ts",
-    "app/retrieve.ts",
-    "app/selectors.ts"
+    "src/app.ts",
+    "src/creds.ts",
+    "src/navigate.ts",
+    "src/retrieve.ts",
+    "src/selectors.ts"
   ]
 }
