@@ -40,21 +40,26 @@ Ensure that the proper node dependencies are installed
 ```    
     
 > If you wish to contribute or make fork public, please make sure to add `creds.js` to your `.gitignore`    
-    
-3. Through the `node` command in the app/ directory    
+ 
+3. Run the TypeScript compiler
+
+        npx tsc
+
+4. Then run the compiled JavaScript through the `node` command in the src/ directory    
 
         node app.js    
  
-**Note: If you notice(while running app.js) that the web page has gone blank, refresh the browser page and proper execution should continue**
 
+**Usually a re-run will fix any unexpected errors**
 
-If an error occurs, the file error.txt will be in the log directory, which is created in the directory the command above is run. Please read the error output in the error.txt. *Usually a re-run will fix any unexpected errors*. 
+*Note: If the application times out and there is no blank page, you may need to increase the Puppeteer page timeout*
+
     
-4. If successful operation, change your directory to where the output files will be    
+5. If successful operation, change your directory to where the output files will be    
 
         cd <output-directory>    
     
-5. Run the shell scripts in scripts/ to populate points and rank breakdowns. 
+6. Run the shell scripts in scripts/ to populate points and rank breakdowns. 
 
         python ../../scripts/json2rankings.py 'YYYY-MM-DD_playerOutput.json'
 
@@ -63,7 +68,7 @@ If an error occurs, the file error.txt will be in the log directory, which is cr
         python ../../scripts/json2csv.py '<YYYY-MM-DD_playerOutput.json>'
         python ../../scripts/csv2rankings.py 'YYYY-MM-DD_output.csv'
 
-6. Enjoy the simple plain text rankings on fantasy players in your league
+7. Enjoy the simple plain text rankings on fantasy players in your league
 
 ---     
     
