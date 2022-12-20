@@ -18,15 +18,23 @@ import * as navigate from './navigate.js'
   /** File Initialization **/
   if (fs.existsSync(outputDirectory)) {
     console.log(outputDirectory, 'directory already exists.')
-    const newDirectory = await rl.question("Please give name of the new directory(without spaces) for the program to use: ")
+    outputDirectory = await rl.question("Please give name of the new directory(without spaces) for the program to use: ")
     
-    try { await mkdir(newDirectory, {recursive: false}) /* rejection if directory exists */ }
-    catch (err) { console.log(newDirectory, 'directory already exists. Please run again, and choose a different name.'); process.exit(1)}
+    try { await mkdir(outputDirectory, {recursive: false}) } /* rejection if directory exists */
+    catch (err) {
+      console.log(outputDirectory, 'directory already exists. Please run again, and choose a different name.')
+      process.exit(1)
+    }
 
-    console.log(`created directory: ${newDirectory}`)
-    outputDirectory = newDirectory
+    console.log(`created directory: ${outputDirectory}`)
   }
+  else {
+    await mkdir(outputDirectory, { recursive: false })
+  }
+
   rl.close()
+
+
 
   const today = new Date().toISOString().slice(0, 10)
   const separator = '_'
@@ -45,7 +53,6 @@ import * as navigate from './navigate.js'
     // Go to Team Roster Page, where the players on one's team are shown
     await navigate.goToCurrentSeasonRoster(page, Selectors, { nflUsername, nflPassword })
     const teamLinks = await retrieve.getLinks(page, Selectors.links)
-    console.log(teamLinks)
     for (let i = 0; i < teamLinks.length; i++) {
       // One team's set of players
       // page.goto(...) called here
