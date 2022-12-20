@@ -1,4 +1,5 @@
-creds.js
+src/creds.js
+src/creds.ts
 node_modules/
-app/output
-app/*.js
+**/output/
+**/*.js
