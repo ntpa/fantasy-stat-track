@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "Node16",
+    "target": "ES2015",
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+  },
+  "files": [
+    "app/app.ts",
+    "app/creds.ts",
+    "app/navigate.ts",
+    "app/retrieve.ts",
+    "app/selectors.ts"
+  ]
+}

@@ -1,10 +1,17 @@
-
+import { Page } from 'puppeteer'
 // Player Object
-function Player (name, position, pointsTotal, leagueTeam) {
-  this.name = name
-  this.position = position
-  this.pointsTotal = pointsTotal
-  this.leagueTeam = leagueTeam
+class Player {
+  name: string;
+  position: string;
+  pointsTotal: string;
+  leagueTeam: string;
+
+  constructor(name: string, position: string, pointsTotal: string, leagueTeam: string) {
+    this.name = name
+    this.position = position
+    this.pointsTotal = pointsTotal
+    this.leagueTeam = leagueTeam
+  }
 }
 
 // ----------- Retrieve Functions --------- //
@@ -12,10 +19,10 @@ function Player (name, position, pointsTotal, leagueTeam) {
     information from a team's web page.
 */
 
-async function getTeamID (teamLink) {
-  const regExpOne = /team/
+async function getTeamID (teamLink: string) {
+  const regExpOne = '/team/'
   const regExpTwo = '?'
-  return await teamLink.slice(teamLink.indexOf(regExpOne), teamLink.indexOf(regExpTwo))
+  return teamLink.slice(teamLink.indexOf(regExpOne), teamLink.indexOf(regExpTwo))
 }
 
 // Return array of links to all teams' roster page
@@ -23,8 +30,8 @@ async function getTeamID (teamLink) {
 //  - page: current page
 //  - selector: CSS selector for individual team roster link
 
-async function getLinks (page, selector) {
-  const teamLinks = [] // teamLinks represent a teams roster page, where player information can be retrieved
+async function getLinks (page: Page, selector: string): Promise<string[]> {
+  const teamLinks: string[] = [] // teamLinks represent a teams roster page, where player information can be retrieved
   await page.waitForSelector(selector)
   await page.$eval(selector, (span) => {
     return span.children.length
@@ -45,7 +52,7 @@ async function getLinks (page, selector) {
 // Function arguements:
 //  - page: current page
 //  - selector: CSS selector for the player's name field
-function getNames (page, selector) {
+function getNames (page: Page, selector: string) {
   return page.$$eval(selector, (table) => {
     const array = []
     for (let i = 0; i < table.length; i++) {
@@ -59,16 +66,18 @@ function getNames (page, selector) {
 // Function arguements:
 //  - page: current page
 //  - selector: CSS selector for the player's position field
-function getPositions (page, selector) {
+function getPositions (page: Page, selector: string): Promise<string[]> {
   return page.$$eval(selector, (table) => {
     const array = []
     for (let i = 0; i < table.length; i++) {
       // Positions represented by 3 or greater  length string
       const positionName = table[i].textContent
-      if (positionName.length === 3) { // DEF no need to slice off
-        array.push(positionName)
-      } else {
-        array.push(positionName.slice(0, 2))
+      if (positionName !== null) {
+        if (positionName.length === 3) { // DEF no need to slice off
+          array.push(positionName)
+        } else {
+          array.push(positionName.slice(0, 2))
+        }
       }
     }
     return array
@@ -79,7 +88,7 @@ function getPositions (page, selector) {
 // Function arguements:
 //  - page: current page
 //  - selectors: CSS Selector for the player's total points field
-function getTotalPoints (page, selector) {
+function getTotalPoints (page: Page, selector: string) {
   return page.$$eval(selector, (table) => {
     const array = []
     for (let i = 0; i < table.length; i++) {
@@ -94,7 +103,7 @@ function getTotalPoints (page, selector) {
 // Function arguements:
 //  - page: current page
 //  - selector: CSS selector for player team name. Team name represents fantasy team name NOT NF: team name
-function getTeamName (page, selector) {
+function getTeamName (page: Page, selector: string) {
   return page.$eval(selector, (span) => span.textContent)
 }
 
@@ -104,18 +113,18 @@ function getTeamName (page, selector) {
 //  - selectors: CSS selectors for player's name, position, total points and team name
 //  - teamLinks: array of links to all teams' roster page
 //  - index: position in teamLinks array
-async function getPlayers (page, selectors, teamLinks, index) {
-  const players = []
+async function getPlayers (page: Page, 
+                           selectors: { desiredWeek: string, playerNameAndInfo: string[],
+                           playerTotalPoints: string, teamName: string }, teamLinks: string[], index: number) {
+  const players: Player[] = []
   await page.goto(teamLinks[index], { waitUntil: 'domcontentloaded'})
 
   // click and go to
-  await Promise.all([
+  await Promise.all ([
     // race condition may happen if waitUntil waits less time
     page.waitForNavigation({ waitUntil: 'networkidle0'}),
     page.click(selectors.desiredWeek) 
   ])
-
-  /
 
   await Promise.all([getNames(page, selectors.playerNameAndInfo[0]),
     getPositions(page, selectors.playerNameAndInfo[1]),
@@ -125,7 +134,10 @@ async function getPlayers (page, selectors, teamLinks, index) {
   ]).then((results) => {
     const length = results[0].length // results[0] results[1] and results[2] all have same lengths
     for (let i = 0; i < length; i++) {
-      players.push(new Player(results[0][i], results[1][i], results[2][i], results[3]))
+      players.push(new Player(results[0][i] ?? "Player not found", 
+                              results[1][i] ?? "Position not found", 
+                              results[2][i] ?? "Points total not found", 
+                              results[3] ?? "League team not found"))
     }
   })
   return players
@@ -134,17 +146,16 @@ async function getPlayers (page, selectors, teamLinks, index) {
 // The two functions below assume that they are called
 // in page context with(or after) retrieve.getPlayers
 
-async function getTeamRecord (page, selectors) {
+async function getTeamRecord (page: Page, selectors: { teamRank: string, teamRecord: string }) {
   await page.waitForSelector(selectors.teamRank)
   return page.$eval(selectors.teamRecord, (span) => span.textContent)
 }
 
-async function getTeamRank (page, selectors) {
-  await page.waitForSelector(selectors.teamRank)
-  return page.$eval(selectors.teamRank, (span) => span.textContent)
+async function getTeamRank (page: Page, selector: string) {
+  await page.waitForSelector(selector)
+  return page.$eval(selector, (span) => span.textContent)
 }
 
-export {
-  getNames, getPositions, getTotalPoints, getTeamName, getLinks, getPlayers,
+export { Player, getNames, getPositions, getTotalPoints, getTeamName, getLinks, getPlayers,
   getTeamRecord, getTeamRank
 }
