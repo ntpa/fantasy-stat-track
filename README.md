@@ -43,7 +43,7 @@ Ensure that the proper node dependencies are installed
  
 3. Run the TypeScript compiler
 
-    npx tsc --noEmitOnError --noImplicitAny --strictNullChecks --moduleResolution node16 --target es2015
+        npx tsc --noEmitOnError --noImplicitAny --strictNullChecks --moduleResolution node16 --target es2015
 
 4. Then run the compiled JavaScript through the `node` command in the src/ directory    
 
