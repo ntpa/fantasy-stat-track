@@ -39,7 +39,7 @@ Ensure that the proper node dependencies are installed
     
 ```    
     
-> If you wish to contribute or make fork public, please make sure to add `creds.ts` and resulting 'creds.js' to your `.gitignore`    
+> If you wish to contribute or make fork public, please make sure to add `creds.ts` and resulting `creds.js` to your `.gitignore`    
  
 3. Run the TypeScript compiler
 
