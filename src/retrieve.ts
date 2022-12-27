@@ -122,7 +122,7 @@ async function getPlayers (page: Page,
   // click and go to
   await Promise.all ([
     // race condition may happen if waitUntil waits less time
-    page.waitForNavigation({ waitUntil: 'networkidle0'}),
+    page.waitForNavigation({ waitUntil: 'domcontentloaded'}),
     page.click(selectors.desiredWeek) 
   ])
 
@@ -139,6 +139,10 @@ async function getPlayers (page: Page,
                               results[2][i] ?? "Points total not found", 
                               results[3] ?? "League team not found"))
     }
+  })
+  .catch((err) => {
+    console.log(err)
+    debugger;
   })
   return players
 }
