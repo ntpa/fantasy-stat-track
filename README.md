@@ -32,8 +32,8 @@ Ensure that the proper node dependencies are installed
 2. Under the fantasy-stat-track/app/ directory create a file named `creds.js`    
     
 ```javascript    
-    nflUsername: '<nfl-fantasy-account-username>'    
-    nflPassword: '<nfl-fantasy-account-password>' 
+    nflUsername: 'nfl-fantasy-account-username'    
+    nflPassword: 'nfl-fantasy-account-password' 
     
     export { nflUsername, nflPassword }
     
@@ -43,7 +43,7 @@ Ensure that the proper node dependencies are installed
  
 3. Run the TypeScript compiler
 
-        npx tsc
+    npx tsc --noEmitOnError --noImplicitAny --strictNullChecks --moduleResolution node16 --target es2015
 
 4. Then run the compiled JavaScript through the `node` command in the src/ directory    
 
@@ -57,7 +57,7 @@ Ensure that the proper node dependencies are installed
     
 5. If successful operation, change your directory to where the output files will be    
 
-        cd <output-directory>    
+        cd 'output-directory'    
     
 6. Run the shell scripts in scripts/ to populate points and rank breakdowns. 
 
@@ -65,7 +65,7 @@ Ensure that the proper node dependencies are installed
 
         *** OR *** 
 
-        python ../../scripts/json2csv.py '<YYYY-MM-DD_playerOutput.json>'
+        python ../../scripts/json2csv.py 'YYYY-MM-DD_playerOutput.json'
         python ../../scripts/csv2rankings.py 'YYYY-MM-DD_output.csv'
 
 7. Enjoy the simple plain text rankings on fantasy players in your league
