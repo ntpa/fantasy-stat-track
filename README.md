@@ -29,7 +29,7 @@ Ensure that the proper node dependencies are installed
     
 ### Running the application     
 1. Sign up for an account    
-2. Under the fantasy-stat-track/app/ directory create a file named `creds.js`    
+2. Under the fantasy-stat-track/src directory create a file named `creds.ts`    
     
 ```javascript    
     nflUsername: 'nfl-fantasy-account-username'    
@@ -39,7 +39,7 @@ Ensure that the proper node dependencies are installed
     
 ```    
     
-> If you wish to contribute or make fork public, please make sure to add `creds.js` to your `.gitignore`    
+> If you wish to contribute or make fork public, please make sure to add `creds.ts` and resulting 'creds.js' to your `.gitignore`    
  
 3. Run the TypeScript compiler
 
