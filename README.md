@@ -31,9 +31,9 @@ Ensure that the proper node dependencies are installed
 1. Sign up for an account    
 2. Under the fantasy-stat-track/src directory create a file named `creds.ts`    
     
-```javascript    
-    nflUsername: 'nfl-fantasy-account-username'    
-    nflPassword: 'nfl-fantasy-account-password' 
+```typescript    
+    const nflUsername = 'nfl-fantasy-account-username'    
+    const nflPassword = 'nfl-fantasy-account-password' 
     
     export { nflUsername, nflPassword }
     
